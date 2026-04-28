@@ -5,9 +5,13 @@ import { CHAT_MODELS, DEFAULT_MODEL } from '../../data/chatModels';
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const groq = getGroqClient();
+    // Access Cloudflare environment variables from locals.runtime.env
+    // This is necessary because secrets are not available in import.meta.env on Cloudflare Workers
+    const runtime = locals.runtime as any;
+    const env = runtime?.env || {};
+    const groq = getGroqClient(env.GROQ_API_KEY);
 
     const body = await request.json();
     const { messages, modelId } = body;

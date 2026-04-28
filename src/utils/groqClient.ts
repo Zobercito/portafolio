@@ -6,11 +6,11 @@ import Groq from 'groq-sdk';
  * returns a lightweight mock client so the UI can function without
  * real API keys. Never use the mock in production.
  */
-export function getGroqClient(): Groq {
-  const apiKey = import.meta.env.GROQ_API_KEY;
+export function getGroqClient(apiKeyOverride?: string): Groq {
+  const apiKey = apiKeyOverride || import.meta.env.GROQ_API_KEY;
 
   if (apiKey) {
-    return new Groq({ apiKey });
+    return new Groq({ apiKey, dangerouslyAllowBrowser: false });
   }
 
   const isDev = Boolean(import.meta.env && import.meta.env.DEV);
