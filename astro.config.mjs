@@ -12,10 +12,22 @@ export default defineConfig({
   adapter: cloudflare({
     // @ts-ignore
     platformProxy: {
-      enabled: true
+      enabled: true,
+      configPath: 'wrangler.deploy.toml'
     }
   }),
   vite: {
+    resolve: {
+      conditions: ['workerd', 'worker', 'browser'],
+      alias: {
+        'tty': '/src/empty.js',
+        'util': '/src/empty.js',
+        'path': '/src/empty.js',
+        'node:tty': '/src/empty.js',
+        'node:util': '/src/empty.js',
+        'node:path': '/src/empty.js'
+      }
+    },
     // @ts-ignore
     plugins: [tailwindcss()],
     optimizeDeps: {
