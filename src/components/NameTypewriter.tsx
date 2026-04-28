@@ -108,7 +108,7 @@ export default function NameTypewriter({
       };
       // Initial delay before typing starts
       setIsTyping(false);
-      timeout = setTimeout(type, 500);
+      timeout = setTimeout(type, 100);
 
     } else if (phase === 'last-normal') {
       let i = 1;
