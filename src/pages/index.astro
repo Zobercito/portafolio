@@ -45,7 +45,9 @@ const socialLinks: SocialLink[] = [
   },
 ];
 
-const turnstileSitekey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+import { env } from "cloudflare:workers";
+const cfEnv = env as any;
+const turnstileSitekey = cfEnv?.PUBLIC_TURNSTILE_SITE_KEY || import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
 ---
 
 <BaseLayout title={owner.name} description={`${owner.name} — ${owner.role}`}>
