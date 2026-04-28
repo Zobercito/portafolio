@@ -1,0 +1,40 @@
+---
+import MiniChat from "../MiniChat.tsx";
+---
+
+<section
+  id="about"
+  data-section="1"
+  class="h-[100svh] xl:h-screen w-full flex flex-col justify-center px-6 sm:px-10 md:px-24 xl:px-6 max-w-5xl mx-auto"
+>
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8 xl:gap-12 items-center w-full pt-8 md:pt-12 xl:pt-16">
+    <div>
+      <h2 class="text-3xl xl:text-5xl font-bold mb-4 xl:mb-6 text-zinc-100">
+        Sobre mí
+      </h2>
+      <div class="space-y-2 xl:space-y-4 text-zinc-400 leading-relaxed text-sm xl:text-base">
+        <p>
+          Soy Francisco, desarrollador Fullstack en último año desde Panamá.
+          Me gusta construir cosas que funcionen bien por dentro: APIs
+          limpias, bases de datos bien diseñadas, lógica que escale.
+        </p>
+        <p>
+          Busco oportunidades donde construir cosas que importen, aprender
+          y crecer constantemente. Si tienes un problema interesante,
+          probablemente quiera resolverlo.
+        </p>
+        <p>
+          ¡Y si quieres saber más sobre mí, no dudes en preguntarle a mi
+          IA en el chat!
+        </p>
+      </div>
+    </div>
+
+    <div
+      id="minichat-container"
+      class="relative w-full md:max-w-2xl md:mx-auto h-[clamp(12rem,calc(100svh-26rem),20rem)] md:h-[32rem] xl:h-[28rem] rounded-2xl border border-zinc-800/80 bg-zinc-900/30 backdrop-blur-sm overflow-hidden flex flex-col transition-transform duration-300"
+    >
+      <MiniChat client:load />
+    </div>
+  </div>
+</section>

@@ -1,0 +1,80 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Navbar from "../components/Navbar.astro";
+import Hero from "../components/sections/Hero.astro";
+import About from "../components/sections/About.astro";
+import ExperienceLayout from "../components/ExperienceLayout.tsx";
+import Contact from "../components/sections/Contact.astro";
+import { icons } from "../data/icons";
+import type { SocialLink } from "../types/portfolio";
+
+const owner = {
+  name: "Francisco González",
+  firstName: "Francisco",
+  lastName: "González",
+  role: "FULLSTACK DEVELOPER | PANAMÁ",
+  tagline:
+    "Estudiante de último año de Ingeniería en Informática y Desarrollador Fullstack, enfocado en construir servicios escalables y optimizar flujos de datos de alto rendimiento.",
+};
+
+const socialLinks: SocialLink[] = [
+  {
+    label: "email",
+    href: "mailto:francisco@zobercito.dev",
+    icon: icons.email.outline,
+    iconHover: icons.email.filled,
+  },
+  {
+    label: "github",
+    href: "https://github.com/Zobercito",
+    icon: icons.github.outline,
+    iconHover: icons.github.filled,
+  },
+  {
+    label: "linkedin",
+    href: "https://www.linkedin.com/in/frank0027/",
+    icon: icons.linkedin.outline,
+    iconHover: icons.linkedin.filled,
+  },
+  {
+    label: "descargar cv",
+    href: "/docs/CV_Francisco_Gonzalez.pdf",
+    icon: icons.cv.outline,
+    iconHover: icons.cv.filled,
+    download: "CV_Francisco_Gonzalez.pdf",
+  },
+];
+
+const turnstileSitekey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+---
+
+<BaseLayout title={owner.name} description={`${owner.name} — ${owner.role}`}>
+  <Navbar />
+
+  <div
+    data-slider-track
+    style="position:fixed;top:0;left:0;width:100%;transition:transform 0.75s cubic-bezier(0.77,0,0.18,1);will-change:transform;"
+  >
+    <Hero
+      firstName={owner.firstName}
+      lastName={owner.lastName}
+      role={owner.role}
+      tagline={owner.tagline}
+      socialLinks={socialLinks}
+    />
+
+    <About />
+
+    <section
+      id="experience"
+      data-section="2"
+      class="h-[100svh] xl:h-screen w-full flex flex-col justify-center px-4 sm:px-8 md:px-24 xl:px-6 max-w-5xl mx-auto"
+    >
+      <div class="w-full pt-10 md:pt-12">
+        <ExperienceLayout client:load />
+      </div>
+    </section>
+
+    <Contact socialLinks={socialLinks} turnstileSitekey={turnstileSitekey} />
+  </div>
+</BaseLayout>

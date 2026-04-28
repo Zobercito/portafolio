@@ -1,0 +1,29 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  icon: string;
+  iconHover: string;
+  download?: string | boolean;
+}
+
+const { href, label, icon, iconHover, download } = Astro.props;
+const target = href.startsWith("mailto") ? "_self" : "_blank";
+---
+
+<a
+  href={href}
+  target={target}
+  rel="noopener noreferrer"
+  download={download}
+  class="group inline-flex items-center gap-2 border border-zinc-800
+         text-zinc-400 text-sm px-4 py-2 rounded-full
+         hover:border-zinc-600 hover:text-zinc-100 hover:scale-105 hover:-translate-y-0.5
+         transition-all duration-300"
+>
+  <div class="relative w-5 h-5 flex-shrink-0">
+    <span set:html={icon} class="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0" />
+    <span set:html={iconHover} class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+  </div>
+  {label}
+</a>

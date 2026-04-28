@@ -1,0 +1,101 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <!-- Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style is:global>
+      /* Bezier-sampled arc with 360deg clockwise rotation */
+      @keyframes rocketFlightPath {
+        0% { transform: translateX(-50%) translateY(150%) rotate(0deg); }
+        10% { transform: translateX(0%) translateY(150%) rotate(36deg); }
+        20% { transform: translateX(50%) translateY(148%) rotate(72deg); }
+        30% { transform: translateX(100%) translateY(143%) rotate(108deg); }
+        40% { transform: translateX(150%) translateY(134%) rotate(144deg); }
+        50% { transform: translateX(200%) translateY(123%) rotate(180deg); }
+        60% { transform: translateX(250%) translateY(108%) rotate(216deg); }
+        70% { transform: translateX(300%) translateY(91%) rotate(252deg); }
+        80% { transform: translateX(350%) translateY(70%) rotate(288deg); }
+        90% { transform: translateX(400%) translateY(47%) rotate(324deg); }
+        100% { transform: translateX(450%) translateY(20%) rotate(360deg); }
+      }
+      .rocket-flying {
+        animation: rocketFlightPath 2.5s linear forwards;
+      }
+      @keyframes vibrate {
+        0%   { transform: translate(0, 0); }
+        25%  { transform: translate(1.5px, 1.5px); }
+        50%  { transform: translate(-1.5px, 1.5px); }
+        75%  { transform: translate(-1.5px, -1.5px); }
+        100% { transform: translate(1.5px, -1.5px); }
+      }
+      .vibrating {
+        animation: vibrate 0.05s infinite;
+      }
+      @keyframes rocketExit {
+        from { transform: translateX(450%) translateY(20%) rotate(360deg); }
+        to   { transform: translateX(450%) translateY(-200vh) rotate(360deg); }
+      }
+      .rocket-exit {
+        animation: rocketExit 1s forwards ease-in !important;
+      }
+      /* Cloudflare Turnstile custom styling */
+      .cf-turnstile {
+        display: flex;
+        justify-content: center;
+        transform: scale(0.85);
+        transform-origin: center;
+        margin-top: -1rem;
+        margin-bottom: -1rem;
+      }
+    </style>
+
+    <!-- Cloudflare Turnstile script -->
+    <script
+      is:inline
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback"
+      defer></script>
+  </head>
+
+  <body class="bg-zinc-950 text-zinc-100 overflow-hidden" style="height:100svh;">
+    <!-- ─── SPACE CANVAS ─────────────────────────────────────────── -->
+    <canvas
+      data-canvas
+      style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"
+    ></canvas>
+
+    <slot />
+
+    <script>
+      import { initSpaceCanvas } from "../scripts/spaceCanvas";
+      import { initSlideEngine } from "../scripts/slideEngine";
+      import { initContactForm } from "../scripts/contactForm";
+
+      initSpaceCanvas();
+      initSlideEngine();
+      initContactForm();
+    </script>
+  </body>
+</html>

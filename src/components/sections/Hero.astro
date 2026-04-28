@@ -1,0 +1,57 @@
+---
+import NameTypewriter from "../NameTypewriter.tsx";
+import SocialButton from "../SocialButton.astro";
+import type { SocialLink } from "../../types/portfolio";
+
+interface Props {
+  firstName: string;
+  lastName: string;
+  role: string;
+  tagline: string;
+  socialLinks: SocialLink[];
+}
+
+const { firstName, lastName, role, tagline, socialLinks } = Astro.props;
+---
+
+<section
+  id="hero"
+  data-section="0"
+  class="relative h-[100svh] xl:h-screen w-full flex flex-col justify-center px-6 sm:px-10 md:px-24 xl:px-6 max-w-5xl mx-auto"
+>
+  <div class="pt-20 sm:pt-24 pb-10 sm:pb-16">
+    <NameTypewriter
+      client:load
+      firstName={firstName}
+      lastName={lastName}
+      speed={80}
+      onArrowClick={() => window.goToSlide(1)}
+    />
+
+    <span
+      class="block text-zinc-500 font-medium text-sm sm:text-base tracking-widest uppercase mb-4 sm:mb-5 ml-1 sm:ml-2 animate-fade-up delay-3"
+    >
+      {role}
+    </span>
+
+    <p
+      class="text-zinc-400 text-base sm:text-lg max-w-sm md:max-w-md mb-8 sm:mb-10 leading-relaxed animate-fade-up delay-3 ml-1 sm:ml-2"
+    >
+      {tagline}
+    </p>
+
+    <div class="flex flex-wrap gap-3 animate-fade-up delay-4">
+      {
+        socialLinks.map((link) => (
+          <SocialButton
+            href={link.href}
+            label={link.label}
+            icon={link.icon}
+            iconHover={link.iconHover}
+            download={link.download}
+          />
+        ))
+      }
+    </div>
+  </div>
+</section>
