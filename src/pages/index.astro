@@ -45,7 +45,9 @@ const socialLinks: SocialLink[] = [
   },
 ];
 
-const turnstileSitekey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+const runtime = Astro.locals.runtime as any;
+const env = runtime?.env || {};
+const turnstileSitekey = env.PUBLIC_TURNSTILE_SITE_KEY || import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
 ---
 
 <BaseLayout title={owner.name} description={`${owner.name} — ${owner.role}`}>
