@@ -212,16 +212,16 @@ export default function NameTypewriter({
       </div>
 
       <h1 className="mb-6 sm:mb-8 leading-[1.05] tracking-tight">
-        <span className="block text-[clamp(2.8rem,9vw,7rem)] font-semibold text-zinc-100">
+        <span className="block text-[clamp(2.8rem,9vw,7rem)] font-semibold text-zinc-100 relative w-fit">
           {typedFirst}
-          <span className={`${cursorClass} ${cursorLine === 'first' ? 'visible' : 'invisible'}`}>_</span>
+          <span className={`${cursorClass} ${cursorLine === 'first' ? 'opacity-100' : 'opacity-0'} absolute -right-[0.6em] top-0`}>_</span>
         </span>
         <span
-          className={`block text-[clamp(2.8rem,9vw,7rem)] font-semibold text-zinc-300 ${phase === 'last-error-pause' ? 'squiggly-error' : ''}`}
+          className={`block text-[clamp(2.8rem,9vw,7rem)] font-semibold text-zinc-300 relative w-fit ${phase === 'last-error-pause' ? 'squiggly-error' : ''}`}
           style={{ visibility: cursorLine === 'first' ? 'hidden' : 'visible' }}
         >
           {secondLineContent}
-          <span className={`${cursorClass} ${cursorLine === 'last' ? 'visible' : 'invisible'}`}>_</span>
+          <span className={`${cursorClass} ${cursorLine === 'last' ? 'opacity-100' : 'opacity-0'} absolute -right-[0.6em] top-0`}>_</span>
         </span>
       </h1>
 
