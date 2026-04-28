@@ -30,3 +30,4 @@ yarn-error.log*
 # Local AI / Dev Tools
 opencode.json
 prompts/
+AGENTS.md
