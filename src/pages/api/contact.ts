@@ -10,10 +10,11 @@ export const prerender = false;
  * 2. Forwards the form data to Web3Forms if validation succeeds
  * 3. Returns the result
  */
-export const POST: APIRoute = async ({ request, locals }) => {
+import { env } from "cloudflare:workers";
+
+export const POST: APIRoute = async ({ request }) => {
   try {
-    const runtime = locals.runtime as any;
-    const env = runtime?.env || {};
+    const cfEnv = env as any;
     
     const body = await request.json();
     const { name, email, message, turnstileToken } = body;
@@ -34,7 +35,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     // Validate Turnstile token on the server
-    const turnstileSecretKey = env.TURNSTILE_SECRET_KEY || import.meta.env.TURNSTILE_SECRET_KEY;
+    const turnstileSecretKey = cfEnv.TURNSTILE_SECRET_KEY || import.meta.env.TURNSTILE_SECRET_KEY;
     if (!turnstileSecretKey) {
       console.error('TURNSTILE_SECRET_KEY no configurada');
       return new Response(
@@ -70,7 +71,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // If Turnstile validation passed, return the Web3Forms access key
     // We CANNOT send the request from the server because Web3Forms free tier blocks Node.js (returns 403 Cloudflare challenge)
-    const web3formsAccessKey = env.WEB3FORMS_ACCESS_KEY || import.meta.env.WEB3FORMS_ACCESS_KEY;
+    const web3formsAccessKey = cfEnv.WEB3FORMS_ACCESS_KEY || import.meta.env.WEB3FORMS_ACCESS_KEY;
     if (!web3formsAccessKey) {
       console.error('WEB3FORMS_ACCESS_KEY no configurada');
       return new Response(
