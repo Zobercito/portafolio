@@ -214,14 +214,14 @@ export default function NameTypewriter({
       <h1 className="mb-6 sm:mb-8 leading-[1.05] tracking-tight">
         <span className="block text-[clamp(2.8rem,9vw,7rem)] font-semibold text-zinc-100">
           {typedFirst}
-          {cursorLine === 'first' && <span className={cursorClass}>_</span>}
+          <span className={`${cursorClass} ${cursorLine === 'first' ? 'visible' : 'invisible'}`}>_</span>
         </span>
         <span
           className={`block text-[clamp(2.8rem,9vw,7rem)] font-semibold text-zinc-300 ${phase === 'last-error-pause' ? 'squiggly-error' : ''}`}
           style={{ visibility: cursorLine === 'first' ? 'hidden' : 'visible' }}
         >
           {secondLineContent}
-          {cursorLine === 'last' && <span className={cursorClass}>_</span>}
+          <span className={`${cursorClass} ${cursorLine === 'last' ? 'visible' : 'invisible'}`}>_</span>
         </span>
       </h1>
 
