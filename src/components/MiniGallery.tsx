@@ -30,6 +30,12 @@ export default function MiniGallery({ title, items, gradientClass, onViewAll, on
     }
   };
 
+  const handleBackClick = () => {
+    if (scrollStep > 0) {
+      setScrollStep(prev => prev - 1);
+    }
+  };
+
   return (
     <article className="group shrink-0 relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/35 p-3 sm:p-4 xl:p-6 backdrop-blur-sm xl:col-span-6 xl:row-span-1 flex flex-col h-full">
       <div className={`pointer-events-none absolute inset-0 ${gradientClass}`} />
@@ -46,18 +52,31 @@ export default function MiniGallery({ title, items, gradientClass, onViewAll, on
       </div>
 
       <div className="relative z-10 mt-3 xl:mt-4 w-full h-22 sm:h-26 md:h-28 xl:flex-1 xl:min-h-0">
+        {scrollStep > 0 && (
+          <button
+            type="button"
+            onClick={handleBackClick}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 h-full w-8 sm:w-10 xl:w-14 bg-linear-to-r from-zinc-950/90 via-zinc-950/60 to-transparent flex items-center justify-start pl-0 sm:pl-1 opacity-50 transition-all hover:opacity-100 text-zinc-300 rounded-l-xl xl:rounded-l-2xl cursor-pointer hover:scale-105 active:scale-95"
+            aria-label={`Retroceder ${title.toLowerCase()}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 xl:w-6 xl:h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+        )}
+
         <button
           type="button"
           onClick={handleArrowClick}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-20 h-full w-8 sm:w-10 xl:w-14 bg-linear-to-l from-zinc-950/90 via-zinc-950/60 to-transparent flex items-center justify-end pr-0 sm:pr-1 opacity-50 transition-all hover:opacity-100 text-zinc-300 rounded-e-xl cursor-pointer hover:scale-105 active:scale-95"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-20 h-full w-8 sm:w-10 xl:w-14 bg-linear-to-l from-zinc-950/90 via-zinc-950/60 to-transparent flex items-center justify-end pr-0 sm:pr-1 opacity-50 transition-all hover:opacity-100 text-zinc-300 rounded-r-xl xl:rounded-r-2xl cursor-pointer hover:scale-105 active:scale-95"
           aria-label={`Avanzar ${title.toLowerCase()}`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={`w-4 h-4 xl:w-6 xl:h-6 transition-transform duration-300 ${scrollStep === 1 ? 'scale-110 text-white' : ''}`}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={`w-4 h-4 xl:w-6 xl:h-6 transition-transform duration-300 ${scrollStep > 0 ? 'scale-110 text-white' : ''}`}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </button>
 
-        <div className="w-full h-full overflow-hidden mask-[linear-gradient(to_right,black_85%,transparent)]">
+        <div className={`w-full h-full overflow-hidden transition-[mask-image] duration-500 ${scrollStep > 0 ? 'mask-[linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]' : 'mask-[linear-gradient(to_right,black_85%,transparent)]'}`}>
           <div
             className="flex w-full h-full gap-3 xl:gap-4 transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]"
             style={{ transform: `translateX(-${scrollStep * 45}%)` }}
