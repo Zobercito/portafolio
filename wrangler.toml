@@ -1,0 +1,18 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "portafolio"
+main = "dist/server/entry.mjs"
+compatibility_date = "2026-04-15"
+
+[assets]
+directory = "dist/client"
+binding = "ASSETS"
+
+[vars]
+PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAAAC_O0RS1ILrCNGVO"
+
+[[kv_namespaces]]
+binding = "SESSION"
+id = "4e54ab5759694e879470da69d6bc0860"
+
+[images]
+binding = "IMAGES"
