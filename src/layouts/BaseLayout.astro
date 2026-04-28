@@ -22,9 +22,22 @@ const { title, description } = Astro.props;
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+    />
+    <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
 
     <style is:global>
       /* Bezier-sampled arc with 360deg clockwise rotation */
@@ -73,6 +86,10 @@ const { title, description } = Astro.props;
     </style>
 
     <!-- Cloudflare Turnstile script -->
+    <script is:inline>
+      // Global callback for Turnstile, will be populated by initContactForm
+      window.onloadTurnstileCallback = window.onloadTurnstileCallback || function() {};
+    </script>
     <script
       is:inline
       src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback"

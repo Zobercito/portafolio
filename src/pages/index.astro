@@ -45,6 +45,7 @@ const socialLinks: SocialLink[] = [
   },
 ];
 
+// @ts-ignore
 import { env } from "cloudflare:workers";
 const cfEnv = env as any;
 const turnstileSitekey = cfEnv?.PUBLIC_TURNSTILE_SITE_KEY || import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
@@ -73,7 +74,7 @@ const turnstileSitekey = cfEnv?.PUBLIC_TURNSTILE_SITE_KEY || import.meta.env.PUB
       class="h-[100svh] xl:h-screen w-full flex flex-col justify-center px-4 sm:px-8 md:px-24 xl:px-6 max-w-5xl mx-auto"
     >
       <div class="w-full pt-10 md:pt-12">
-        <ExperienceLayout client:load />
+        <ExperienceLayout client:visible />
       </div>
     </section>
 

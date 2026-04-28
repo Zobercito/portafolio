@@ -1,5 +1,5 @@
 ---
-import NameTypewriter from "../NameTypewriter.tsx";
+import NameTypewriter from "../NameTypewriter";
 import SocialButton from "../SocialButton.astro";
 import type { SocialLink } from "../../types/portfolio";
 
@@ -29,13 +29,13 @@ const { firstName, lastName, role, tagline, socialLinks } = Astro.props;
     />
 
     <span
-      class="block text-zinc-500 font-medium text-sm sm:text-base tracking-widest uppercase mb-4 sm:mb-5 ml-1 sm:ml-2 animate-fade-up delay-3"
+      class="block text-zinc-400 font-medium text-sm sm:text-base tracking-widest uppercase mb-4 sm:mb-5 ml-1 sm:ml-2 animate-fade-up delay-3"
     >
       {role}
     </span>
 
     <p
-      class="text-zinc-400 text-base sm:text-lg max-w-sm md:max-w-md mb-8 sm:mb-10 leading-relaxed animate-fade-up delay-3 ml-1 sm:ml-2"
+      class="text-zinc-300 text-base sm:text-lg max-w-sm md:max-w-md mb-8 sm:mb-10 leading-relaxed animate-fade-up delay-3 ml-1 sm:ml-2"
     >
       {tagline}
     </p>

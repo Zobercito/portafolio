@@ -10,6 +10,7 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare({
+    // @ts-ignore
     platformProxy: {
       enabled: true
     }
@@ -19,6 +20,10 @@ export default defineConfig({
     plugins: [tailwindcss()],
     optimizeDeps: {
       include: ['react-dom/client', 'react-dom']
+    },
+    build: {
+      // @ts-ignore
+      sourcemap: true
     }
   },
   integrations: [react()]

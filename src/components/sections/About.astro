@@ -1,5 +1,5 @@
 ---
-import MiniChat from "../MiniChat.tsx";
+import MiniChat from "../MiniChat";
 ---
 
 <section
@@ -34,7 +34,7 @@ import MiniChat from "../MiniChat.tsx";
       id="minichat-container"
       class="relative w-full md:max-w-2xl md:mx-auto h-[clamp(12rem,calc(100svh-26rem),20rem)] md:h-[32rem] xl:h-[28rem] rounded-2xl border border-zinc-800/80 bg-zinc-900/30 backdrop-blur-sm overflow-hidden flex flex-col transition-transform duration-300"
     >
-      <MiniChat client:load />
+      <MiniChat client:visible />
     </div>
   </div>
 </section>
