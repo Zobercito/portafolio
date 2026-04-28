@@ -8,7 +8,7 @@ directory = "dist/client"
 binding = "ASSETS"
 
 [vars]
-PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAAAC_O0RS1ILrCNGVO"
+PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAAC_O0RS1ILrCNGVO"
 
 [[kv_namespaces]]
 binding = "SESSION"
