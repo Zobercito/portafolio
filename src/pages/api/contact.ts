@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const cfEnv = env as any;
     
-    const body = await request.json();
+    const body = await request.json() as { name: string, email: string, message: string, turnstileToken: string };
     const { name, email, message, turnstileToken } = body;
 
     // Validate required fields
@@ -56,7 +56,7 @@ export const POST: APIRoute = async ({ request }) => {
       }
     );
 
-    const turnstileResult = await turnstileValidationResponse.json();
+    const turnstileResult = await turnstileValidationResponse.json() as { success: boolean, 'error-codes'?: string[] };
 
     if (!turnstileResult.success) {
       console.error('Turnstile validation failed:', turnstileResult);

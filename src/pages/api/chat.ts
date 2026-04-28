@@ -11,7 +11,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const groq = getGroqClient((env as any).GROQ_API_KEY);
 
-    const body = await request.json();
+    const body = await request.json() as { messages: any[], modelId: string };
     const { messages, modelId } = body;
 
     if (!messages || !Array.isArray(messages)) {

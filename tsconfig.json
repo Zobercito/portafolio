@@ -12,7 +12,8 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "types": [
-      "node"
+      "node",
+      "@cloudflare/workers-types"
     ]
   }
 }
