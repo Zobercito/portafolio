@@ -7,9 +7,10 @@ interface ModalDetailProps {
   onNext: (e: React.MouseEvent) => void;
   onBack: () => void;
   detailRef: React.RefObject<HTMLDivElement | null>;
+  category?: string;
 }
 
-export function ModalDetail({ item, showNavigation, onPrev, onNext, onBack, detailRef }: ModalDetailProps) {
+export function ModalDetail({ item, showNavigation, onPrev, onNext, onBack, detailRef, category }: ModalDetailProps) {
   return (
     <div
       ref={detailRef}
@@ -30,7 +31,7 @@ export function ModalDetail({ item, showNavigation, onPrev, onNext, onBack, deta
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
             </svg>
-            <span>URL DEL CERTIFICADO</span>
+            <span>{category === 'Proyectos' ? 'Ver en GitHub' : 'Ver Certificado'}</span>
           </a>
         )}
 
@@ -86,7 +87,9 @@ export function ModalDetail({ item, showNavigation, onPrev, onNext, onBack, deta
           )}
           {item.skills && item.skills.length > 0 && (
             <div className="mt-4 pt-4 border-t border-zinc-800/60">
-              <h5 className="text-xs sm:text-sm uppercase tracking-widest text-zinc-500 font-medium mb-2.5">Tecnologías y conocimientos aprendidos:</h5>
+              <h5 className="text-xs sm:text-sm uppercase tracking-widest text-zinc-500 font-medium mb-2.5">
+                {category === 'Proyectos' ? 'Tecnologías utilizadas:' : 'Tecnologías y conocimientos aprendidos:'}
+              </h5>
               <div className="flex flex-wrap justify-center gap-2">
                 {item.skills.map((skill, idx) => (
                   <span

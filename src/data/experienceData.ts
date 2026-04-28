@@ -55,7 +55,14 @@ export const education: Education[] = [
 ];
 
 export const projects: (ModalItemData | string)[] = [
-  '', '', '', '', '', '', '' // 7 Placeholders
+  {
+    title: 'Mi Portafolio Web',
+    image: '/img/projects/Portfolio_GIF.gif',
+    description: 'Plataforma personal interactiva diseñada para centralizar mi trayectoria, certificaciones y proyectos. Cuenta con un diseño premium enfocado en la experiencia de usuario, integrando un chatbot inteligente con IA para consultas dinámicas sobre mi perfil profesional.',
+    url: 'https://github.com/Zobercito/portafolio',
+    skills: ['Astro', 'React', 'Tailwind CSS', 'TypeScript', 'Cloudflare Workers', 'IA Integration']
+  },
+  '', '', '', '', '', '' // 6 Placeholders remaining
 ];
 
 export const certificates: (ModalItemData | string)[] = [

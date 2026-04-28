@@ -143,6 +143,7 @@ export default function ModalOverlay({ isOpen, title, items, onClose, initialIte
           onNext={handleNext}
           onBack={() => initialItem ? onClose() : setSelectedItem(null)}
           detailRef={lightboxRef}
+          category={title}
         />
       )}
     </div>,
