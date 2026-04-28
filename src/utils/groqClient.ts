@@ -7,13 +7,13 @@ import Groq from 'groq-sdk';
  * real API keys. Never use the mock in production.
  */
 export function getGroqClient(): Groq {
-  const apiKey = import.meta.env.GROQ_API_KEY || process.env.GROQ_API_KEY;
+  const apiKey = import.meta.env.GROQ_API_KEY;
 
   if (apiKey) {
     return new Groq({ apiKey });
   }
 
-  const isDev = Boolean(import.meta.env && import.meta.env.DEV) || process.env.NODE_ENV === 'development';
+  const isDev = Boolean(import.meta.env && import.meta.env.DEV);
 
   if (!isDev) {
     throw new Error('GROQ_API_KEY is not configured in the environment variables.');

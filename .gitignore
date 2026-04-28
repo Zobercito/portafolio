@@ -31,3 +31,6 @@ yarn-error.log*
 opencode.json
 prompts/
 AGENTS.md
+
+# Cloudflare
+.wrangler/
