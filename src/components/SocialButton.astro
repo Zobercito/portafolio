@@ -21,7 +21,7 @@ const target = href.startsWith("mailto") ? "_self" : "_blank";
          hover:border-zinc-600 hover:text-zinc-100 hover:scale-105 hover:-translate-y-0.5
          transition-all duration-300"
 >
-  <div class="relative w-5 h-5 flex-shrink-0">
+  <div class="relative w-5 h-5 shrink-0">
     <span set:html={icon} class="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0" />
     <span set:html={iconHover} class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
   </div>
