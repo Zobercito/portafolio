@@ -62,12 +62,12 @@ export default function ExperienceLayout() {
 
   return (
     <>
-      <div className="flex flex-col gap-3 md:gap-4 xl:grid xl:grid-cols-12 xl:grid-rows-3 xl:h-[46rem] xl:grid-flow-dense">
+      <div className="flex flex-col gap-3 md:gap-4 xl:grid xl:grid-cols-12 xl:grid-rows-3 xl:h-184 xl:grid-flow-dense">
 
         {/* 1. EXPERIENCE */}
         <article
           ref={expRef}
-          className={`relative xl:col-span-6 xl:row-span-2 xl:col-start-1 xl:row-start-1 md:h-[11rem] xl:h-full md:shrink-0 rounded-2xl ${isExpExpanded ? 'z-50 overflow-visible' : 'z-10 overflow-hidden custom-scrollbar'
+          className={`relative xl:col-span-6 xl:row-span-2 xl:col-start-1 xl:row-start-1 md:h-44 xl:h-full md:shrink-0 rounded-2xl ${isExpExpanded ? 'z-50 overflow-visible' : 'z-10 overflow-hidden custom-scrollbar'
             }`}
         >
           {/* Animated mobile background */}
@@ -150,7 +150,7 @@ export default function ExperienceLayout() {
 
         {/* Grid Bottom Section */}
         <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:contents shrink-0">
-          <article className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/35 p-3 sm:p-4 xl:p-6 backdrop-blur-sm xl:col-span-6 xl:row-span-1 xl:h-[11rem] xl:col-start-1 xl:row-start-3">
+          <article className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/35 p-3 sm:p-4 xl:p-6 backdrop-blur-sm xl:col-span-6 xl:row-span-1 xl:h-44 xl:col-start-1 xl:row-start-3">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.08),transparent_45%)]" />
             <h3 className="relative z-10 mb-2 xl:mb-4 text-sm sm:text-base xl:text-xl font-semibold tracking-wide text-zinc-100">Educación</h3>
             <div className="relative z-10 flex flex-col gap-2 xl:gap-6">
@@ -177,31 +177,31 @@ export default function ExperienceLayout() {
             </div>
           </article>
 
-          <article className="group relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/35 p-3 sm:p-4 xl:p-6 backdrop-blur-sm xl:col-span-6 xl:row-span-1 xl:h-[11rem] xl:col-start-7 xl:row-start-3 flex flex-col">
+          <article className="group relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/35 p-3 sm:p-4 xl:p-6 backdrop-blur-sm xl:col-span-6 xl:row-span-1 xl:h-44 xl:col-start-7 xl:row-start-3 flex flex-col">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(59,130,246,0.15),transparent_42%)]" />
             <h3 className="relative z-10 text-sm sm:text-base xl:text-xl font-semibold tracking-wide text-zinc-100 shrink-0">Stack</h3>
 
             <div className="relative z-10 w-full mt-1 xl:mt-2 xl:flex-1 xl:min-h-0 flex flex-col justify-center">
-              <button type="button" onClick={() => handleManualScroll('left')} className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 h-5/6 w-8 sm:w-10 xl:w-12 bg-gradient-to-r from-zinc-950/80 to-transparent items-center justify-start pl-0 sm:pl-1 opacity-40 hover:opacity-100 transition-opacity text-zinc-300 rounded-s-md" aria-label="Retroceder">
+              <button type="button" onClick={() => handleManualScroll('left')} className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 h-5/6 w-8 sm:w-10 xl:w-12 bg-linear-to-r from-zinc-950/80 to-transparent items-center justify-start pl-0 sm:pl-1 opacity-40 hover:opacity-100 transition-opacity text-zinc-300 rounded-s-md" aria-label="Retroceder">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 xl:w-5 xl:h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
               </button>
 
-              <button type="button" onClick={() => handleManualScroll('right')} className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 h-5/6 w-8 sm:w-10 xl:w-12 bg-gradient-to-l from-zinc-950/80 to-transparent items-center justify-end pr-0 sm:pr-1 opacity-40 hover:opacity-100 transition-opacity text-zinc-300 rounded-e-md" aria-label="Avanzar">
+              <button type="button" onClick={() => handleManualScroll('right')} className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 h-5/6 w-8 sm:w-10 xl:w-12 bg-linear-to-l from-zinc-950/80 to-transparent items-center justify-end pr-0 sm:pr-1 opacity-40 hover:opacity-100 transition-opacity text-zinc-300 rounded-e-md" aria-label="Avanzar">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 xl:w-5 xl:h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
               </button>
 
-              <div className="w-full [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+              <div className="w-full mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
                 <div ref={scrollRef} className="flex w-full shrink-0 flex-nowrap items-center overflow-x-hidden gap-6 pr-6 sm:gap-9 sm:pr-9 xl:gap-11 xl:pr-11 pt-2 xl:pt-3 pb-2 xl:pb-3">
                   {Array(8).fill(stackIcons).flat().map((icon: StackIcon, index: number) => (
                     <div
                       key={`${icon.name}-${index}`}
                       onMouseEnter={() => setIsHovered(true)}
                       onMouseLeave={() => setIsHovered(false)}
-                      className="relative group/icon flex flex-col items-center justify-start shrink-0 transition-transform hover:-translate-y-1.5 w-9 sm:w-10 xl:w-11 h-[3.25rem] sm:h-[3.75rem] xl:h-[4.25rem]"
+                      className="relative group/icon flex flex-col items-center justify-start shrink-0 transition-transform hover:-translate-y-1.5 w-9 sm:w-10 xl:w-11 h-13 sm:h-15 xl:h-17"
                       title={icon.name}
                     >
                       <img src={icon.url} alt={icon.name} loading="lazy" decoding="async" className="h-8 w-8 sm:h-10 sm:w-10 xl:h-11 xl:w-11 object-contain opacity-80 transition-opacity group-hover/icon:opacity-100" />

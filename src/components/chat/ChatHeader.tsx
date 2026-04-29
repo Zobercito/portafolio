@@ -28,7 +28,7 @@ export function ChatHeader({
       : null;
 
   return (
-    <div className="px-3 py-2 border-b border-zinc-800/50 bg-zinc-900/30 w-full flex items-center justify-between shrink-0 h-[52px]">
+    <div className="px-3 py-2 border-b border-zinc-800/50 bg-zinc-900/30 w-full flex items-center justify-between shrink-0 h-13">
       {/* Dynamic conversation title */}
       <div className="flex items-center gap-2 flex-1 min-w-0 text-[13px] font-medium text-zinc-400 px-10 truncate">
         {isGeneratingTitle ? (
