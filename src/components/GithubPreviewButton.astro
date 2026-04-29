@@ -84,6 +84,10 @@ const { href, label, icon, iconHover } = Astro.props;
   const localTimeNode = document.querySelector("[data-github-local-time]");
   let hoverTimer: number | null = null;
 
+  // Only enable preview behavior on devices that support hover (desktop/laptop).
+  // This avoids showing the preview or running timers on touch/phone devices.
+  const isDesktop = typeof window !== "undefined" && window.matchMedia('(hover: hover) and (min-width: 640px)').matches;
+
   const formatOffset = (date: Date) => {
     const totalMinutes = -date.getTimezoneOffset();
     const sign = totalMinutes >= 0 ? "+" : "-";
@@ -163,27 +167,33 @@ const { href, label, icon, iconHover } = Astro.props;
     closeCard();
   };
 
-  renderLocalTime();
-
-  // Sync next update to the exact start of the next minute, then update every 60s.
-  const nowSync = new Date();
-  const msToNext = (60 - nowSync.getSeconds()) * 1000 - nowSync.getMilliseconds();
-  let minuteInterval: number | null = null;
-  let minuteTimeout: number | null = window.setTimeout(() => {
+  if (isDesktop) {
     renderLocalTime();
-    minuteInterval = window.setInterval(renderLocalTime, 60_000) as unknown as number;
-    minuteTimeout = null;
-  }, msToNext) as unknown as number;
 
-  if (wrap) {
-    wrap.addEventListener("mouseenter", handleMouseEnter);
-    wrap.addEventListener("mouseleave", handleMouseLeave);
+    // Sync next update to the exact start of the next minute, then update every 60s.
+    const nowSync = new Date();
+    const msToNext = (60 - nowSync.getSeconds()) * 1000 - nowSync.getMilliseconds();
+    let minuteInterval: number | null = null;
+    let minuteTimeout: number | null = window.setTimeout(() => {
+      renderLocalTime();
+      minuteInterval = window.setInterval(renderLocalTime, 60_000) as unknown as number;
+      minuteTimeout = null;
+    }, msToNext) as unknown as number;
+
+    if (wrap) {
+      wrap.addEventListener("mouseenter", handleMouseEnter);
+      wrap.addEventListener("mouseleave", handleMouseLeave);
+    }
+
+    // Clean up on page unload to avoid dangling timers (good practice)
+    window.addEventListener("beforeunload", () => {
+      if (minuteTimeout) window.clearTimeout(minuteTimeout as number);
+      if (minuteInterval) window.clearInterval(minuteInterval as number);
+      if (hoverTimer) window.clearTimeout(hoverTimer as number);
+    });
+  } else {
+    // Ensure the preview card remains closed and inert on touch / small devices
+    if (card) card.dataset.open = "false";
+    if (wrap) wrap.setAttribute("data-github-preview-disabled", "true");
   }
-
-  // Clean up on page unload to avoid dangling timers (good practice)
-  window.addEventListener("beforeunload", () => {
-    if (minuteTimeout) window.clearTimeout(minuteTimeout as number);
-    if (minuteInterval) window.clearInterval(minuteInterval as number);
-    if (hoverTimer) window.clearTimeout(hoverTimer as number);
-  });
 </script>
