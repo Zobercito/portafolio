@@ -1,5 +1,6 @@
 ---
 import NameTypewriter from "../NameTypewriter";
+import GithubPreviewButton from "../GithubPreviewButton.astro";
 import SocialButton from "../SocialButton.astro";
 import type { SocialLink } from "../../types/portfolio";
 
@@ -42,15 +43,24 @@ const { firstName, lastName, role, tagline, socialLinks } = Astro.props;
 
     <div class="flex flex-wrap gap-3 animate-fade-up delay-4">
       {
-        socialLinks.map((link) => (
-          <SocialButton
-            href={link.href}
-            label={link.label}
-            icon={link.icon}
-            iconHover={link.iconHover}
-            download={link.download}
-          />
-        ))
+        socialLinks.map((link) =>
+          link.label === "github" ? (
+            <GithubPreviewButton
+              href={link.href}
+              label={link.label}
+              icon={link.icon}
+              iconHover={link.iconHover}
+            />
+          ) : (
+            <SocialButton
+              href={link.href}
+              label={link.label}
+              icon={link.icon}
+              iconHover={link.iconHover}
+              download={link.download}
+            />
+          )
+        )
       }
     </div>
   </div>
