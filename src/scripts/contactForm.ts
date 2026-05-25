@@ -2,9 +2,19 @@
 // Handles Turnstile captcha rendering, form submission, and the 5-phase
 // rocket launch sequence. The callback hell has been replaced with async/await.
 
-
 // Utility to pause async sequences without nested setTimeout pyramids
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+interface ContactApiResponse {
+  success: boolean;
+  accessKey?: string;
+  error?: string;
+}
+
+interface Web3FormsResponse {
+  success: boolean;
+  message?: string;
+}
 
 async function playRocketSequence(
   rocket: HTMLElement,
@@ -149,7 +159,7 @@ export function initContactForm() {
         body: JSON.stringify({ name, email, message, turnstileToken }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as ContactApiResponse;
       if (!response.ok || !data.success) {
         throw new Error(data.error || "Error en la validación de seguridad");
       }
@@ -168,7 +178,7 @@ export function initContactForm() {
         }),
       });
 
-      const web3Result = await web3formsResponse.json();
+      const web3Result = (await web3formsResponse.json()) as Web3FormsResponse;
       if (!web3formsResponse.ok || !web3Result.success) {
         throw new Error(web3Result.message || "Error al enviar el mensaje");
       }

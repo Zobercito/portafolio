@@ -3,6 +3,15 @@ import { getGroqClient } from '../../utils/groqClient';
 
 export const prerender = false;
 
+interface TitleRequest {
+  userMessage: string;
+  assistantMessage?: string;
+}
+
+interface TitleResponse {
+  title: string;
+}
+
 const TITLE_SYSTEM_PROMPT = `Eres un experto redactor. Tu única tarea es leer la interacción entre el usuario y el asistente y generar un título corto y descriptivo para la conversación.
 Reglas estrictas:
 - El título debe tener entre 3 y 5 palabras máximo.
@@ -13,7 +22,7 @@ Reglas estrictas:
 export const POST: APIRoute = async ({ request }) => {
   try {
     const groq = getGroqClient();
-    const body = await request.json();
+    const body: TitleRequest = await request.json();
     const { userMessage, assistantMessage } = body;
 
     if (!userMessage) {
@@ -35,7 +44,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     const title = completion.choices[0]?.message?.content?.trim().replace(/^["']|["']$/g, '') || 'Nueva conversación';
 
-    return new Response(JSON.stringify({ title }), {
+    const responseBody: TitleResponse = { title };
+    return new Response(JSON.stringify(responseBody), {
       headers: {
         'Content-Type': 'application/json'
       }

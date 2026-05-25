@@ -7,6 +7,10 @@ interface UseChatStreamingProps {
   onTitleGenerated: (chatId: string, title: string) => void;
 }
 
+interface TitleResponse {
+  title: string;
+}
+
 export function useChatStreaming({
   selectedModel,
   onMessagesUpdate,
@@ -28,7 +32,7 @@ export function useChatStreaming({
         body: JSON.stringify({ userMessage, assistantMessage }),
       });
       if (res.ok) {
-        const data = await res.json();
+        const data: TitleResponse = await res.json();
         onTitleGenerated(chatId, data.title);
       }
     } catch {
