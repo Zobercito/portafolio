@@ -34,3 +34,6 @@ Thumbs.db
 # Local temp files
 *.tmp
 *.temp
+
+# Local code index
+.codegraph/
