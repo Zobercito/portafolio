@@ -1,12 +1,14 @@
 // ─── CONTACT FORM + ROCKET ANIMATION ────────────────────────────────────
-// Handles Turnstile captcha rendering, form submission, and the 5-phase
-// rocket launch sequence. The callback hell has been replaced with async/await.
+// Handles Turnstile captcha rendering, form submission, and the decorative
+// rocket launch sequence. Feedback is rendered inline (no native alerts).
 
-// Utility to pause async sequences without nested setTimeout pyramids
+import type { TurnstileApi } from '../global';
+
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 interface ContactApiResponse {
   success: boolean;
+  sent?: 'server' | 'browser';
   accessKey?: string;
   error?: string;
 }
@@ -14,6 +16,16 @@ interface ContactApiResponse {
 interface Web3FormsResponse {
   success: boolean;
   message?: string;
+}
+
+interface PublicConfigResponse {
+  turnstileSitekey: string;
+}
+
+type StatusKind = 'info' | 'success' | 'error';
+
+function prefersReducedMotion(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 async function playRocketSequence(
@@ -77,86 +89,122 @@ async function playRocketSequence(
   rocket.style.transition = "none";
   rocket.style.transform = "translateX(-50%) translateY(0%)";
   if (flame) flame.style.display = "none";
+}
 
-  if (window.turnstile) window.turnstile.reset();
+async function waitForTurnstile(timeoutMs = 10000): Promise<TurnstileApi | null> {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    if (window.turnstile) return window.turnstile;
+    await sleep(100);
+  }
+  return null;
+}
+
+async function resolveSitekey(form: HTMLElement): Promise<string> {
+  const fromForm = form.getAttribute("data-turnstile-sitekey")?.trim();
+  if (fromForm) return fromForm;
+
+  try {
+    const response = await fetch("/api/config");
+    if (!response.ok) return "";
+    const data = (await response.json()) as PublicConfigResponse;
+    return data.turnstileSitekey?.trim() ?? "";
+  } catch {
+    return "";
+  }
 }
 
 export function initContactForm() {
-  const contactForm = document.querySelector("[data-contact-form]") as HTMLElement | null;
+  const contactForm = document.querySelector("[data-contact-form]") as HTMLFormElement | null;
   const submitBtn = document.querySelector("[data-submit-btn]") as HTMLButtonElement | null;
-  const turnstileSitekey = contactForm?.getAttribute("data-turnstile-sitekey");
+  const statusEl = document.querySelector("[data-contact-status]") as HTMLElement | null;
+  const widgetEl = document.querySelector(".cf-turnstile") as HTMLElement | null;
+  if (!contactForm || !submitBtn || !widgetEl) return;
 
-  // Make it global so Cloudflare Turnstile can find it via ?onload=...
-  window.onloadTurnstileCallback = function () {
-    if (submitBtn && window.turnstile && turnstileSitekey) {
-      window.turnstile.render(".cf-turnstile", {
-        sitekey: turnstileSitekey,
-        theme: "dark",
-        callback: () => {
-          // Captcha passed: enable submit
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Enviar mensaje";
-          submitBtn.classList.remove("opacity-50", "cursor-not-allowed", "disabled:hover:scale-100");
-        },
-        "error-callback": () => {
-          // Captcha failed
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Captcha inválido";
-          submitBtn.classList.add("opacity-50", "cursor-not-allowed");
-        },
-        "expired-callback": () => {
-          // Captcha token expired
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Completa el captcha nuevamente";
-          submitBtn.classList.add("opacity-50", "cursor-not-allowed");
-        },
-      });
-    }
+  let widgetId: string | null = null;
+
+  const setStatus = (kind: StatusKind, message: string) => {
+    if (!statusEl) return;
+    statusEl.dataset.kind = kind;
+    statusEl.textContent = message;
   };
 
-  if (!contactForm) return;
+  const setSubmitEnabled = (enabled: boolean, label = "Enviar mensaje") => {
+    submitBtn.disabled = !enabled;
+    submitBtn.textContent = label;
+    submitBtn.classList.toggle("opacity-50", !enabled);
+    submitBtn.classList.toggle("cursor-not-allowed", !enabled);
+  };
 
-  contactForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const btn = document.querySelector("[data-submit-btn]") as HTMLButtonElement | null;
+  const resetCaptcha = () => {
+    if (window.turnstile && widgetId) {
+      window.turnstile.reset(widgetId);
+    }
+    setSubmitEnabled(false, "Completa el captcha para enviar");
+  };
 
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = "Validando...";
-      btn.classList.remove("hover:bg-zinc-200", "hover:scale-[1.02]", "active:scale-[0.98]");
-      btn.classList.add("cursor-not-allowed", "opacity-70");
+  (async () => {
+    const turnstile = await waitForTurnstile();
+    if (!turnstile) {
+      setStatus('error', "No se pudo cargar la verificación de seguridad. Recarga la página.");
+      return;
     }
 
-    try {
-      // Retrieve Turnstile token from the hidden input
-      const turnstileRes = document.querySelector(
-        '[name="cf-turnstile-response"]',
-      ) as HTMLInputElement | null;
-      const turnstileToken = turnstileRes?.value;
+    const sitekey = await resolveSitekey(contactForm);
+    if (!sitekey) {
+      setStatus('error', "La verificación de seguridad no está configurada.");
+      return;
+    }
 
-      if (!turnstileToken) {
-        alert("Por favor completa la verificación de seguridad");
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = "Enviar mensaje";
-          btn.classList.remove("cursor-not-allowed", "opacity-70");
-          btn.classList.add("hover:bg-zinc-200", "hover:scale-[1.02]", "active:scale-[0.98]");
-        }
+    widgetId = turnstile.render(widgetEl, {
+      sitekey,
+      theme: "dark",
+      callback: () => {
+        setSubmitEnabled(true);
+        setStatus('info', "");
+      },
+      "error-callback": () => {
+        setSubmitEnabled(false, "Captcha inválido");
+        setStatus('error', "La verificación falló. Inténtalo de nuevo.");
+      },
+      "expired-callback": () => {
+        setSubmitEnabled(false, "Completa el captcha nuevamente");
+        setStatus('error', "La verificación expiró. Complétala de nuevo.");
+      },
+    });
+  })();
+
+  contactForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Validando...";
+    submitBtn.classList.remove("hover:bg-zinc-200", "hover:scale-[1.02]", "active:scale-[0.98]");
+    submitBtn.classList.add("cursor-not-allowed", "opacity-70");
+    setStatus('info', "");
+
+    try {
+      const token = (widgetId && window.turnstile?.getResponse(widgetId)) ||
+        (document.querySelector('[name="cf-turnstile-response"]') as HTMLInputElement | null)?.value;
+
+      if (!token) {
+        setStatus('error', "Por favor completa la verificación de seguridad.");
+        setSubmitEnabled(false, "Completa el captcha para enviar");
         return;
       }
 
-      const formData = new FormData(contactForm as HTMLFormElement);
-      const name = formData.get("name");
-      const email = formData.get("email");
-      const message = formData.get("message");
+      const formData = new FormData(contactForm);
+      const name = String(formData.get("name") ?? "");
+      const email = String(formData.get("email") ?? "");
+      const message = String(formData.get("message") ?? "");
 
-      if (btn) btn.textContent = "Enviando mensaje...";
+      submitBtn.textContent = "Enviando mensaje...";
 
       // Verify Turnstile server-side and get the Web3Forms access key
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, turnstileToken }),
+        body: JSON.stringify({ name, email, message, turnstileToken: token }),
       });
 
       const data = (await response.json()) as ContactApiResponse;
@@ -164,39 +212,52 @@ export function initContactForm() {
         throw new Error(data.error || "Error en la validación de seguridad");
       }
 
-      // Send directly from the browser — Web3Forms rejects Node.js backend calls
-      const web3formsResponse = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: data.accessKey,
-          name,
-          email,
-          message,
-          from_name: "Portafolio Contact Form",
-          subject: `Nuevo mensaje de ${name} desde Portafolio`,
-        }),
-      });
+      // Legacy fallback: Web3Forms submission from the browser. When the
+      // server sends the mail itself there is no accessKey to use.
+      if (data.accessKey) {
+        const web3formsResponse = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            access_key: data.accessKey,
+            name,
+            email,
+            message,
+            from_name: "Portafolio Contact Form",
+            subject: `Nuevo mensaje de ${name} desde Portafolio`,
+          }),
+        });
 
-      const web3Result = (await web3formsResponse.json()) as Web3FormsResponse;
-      if (!web3formsResponse.ok || !web3Result.success) {
-        throw new Error(web3Result.message || "Error al enviar el mensaje");
+        const web3Result = (await web3formsResponse.json()) as Web3FormsResponse;
+        if (!web3formsResponse.ok || !web3Result.success) {
+          throw new Error(web3Result.message || "Error al enviar el mensaje");
+        }
       }
 
-      // Everything succeeded — launch the rocket
+      setStatus('success', "¡Mensaje enviado! Gracias por escribirme.");
+
       const rocket = document.querySelector("[data-rocket]") as HTMLElement | null;
-      if (rocket) {
-        playRocketSequence(rocket, btn, contactForm);
+      if (rocket && !prefersReducedMotion()) {
+        await playRocketSequence(rocket, submitBtn, contactForm);
+      } else {
+        contactForm.reset();
+        submitBtn.textContent = "¡Mensaje enviado!";
+        submitBtn.classList.add("bg-green-600", "text-white");
+        submitBtn.classList.remove("bg-zinc-100", "text-zinc-900");
+        await sleep(2500);
+        submitBtn.classList.remove("bg-green-600", "text-white");
+        submitBtn.classList.add("bg-zinc-100", "text-zinc-900");
       }
-    } catch (error: any) {
-      alert(`Error: ${error.message}`);
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "Enviar mensaje";
-        btn.classList.remove("cursor-not-allowed", "opacity-70");
-        btn.classList.add("hover:bg-zinc-200", "hover:scale-[1.02]", "active:scale-[0.98]");
-      }
-      if (window.turnstile) window.turnstile.reset();
+
+      resetCaptcha();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al enviar el mensaje";
+      setStatus('error', message);
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Completa el captcha para enviar";
+      if (window.turnstile && widgetId) window.turnstile.reset(widgetId);
+    } finally {
+      submitBtn.classList.remove("cursor-not-allowed", "opacity-70");
     }
   });
 
@@ -207,9 +268,9 @@ export function initContactForm() {
       navigator.clipboard.writeText(email);
       const label = copyBtn.querySelector("[data-copy-label]");
       if (label) {
-        const original = label.innerHTML;
-        label.innerHTML = "¡Copiado!";
-        setTimeout(() => (label.innerHTML = original), 2000);
+        const original = label.textContent;
+        label.textContent = "¡Copiado!";
+        setTimeout(() => (label.textContent = original), 2000);
       }
     });
   });

@@ -1,97 +1,102 @@
 import type { APIRoute } from 'astro';
+import { ContactValidationError, validateContactPayload } from '../../utils/contactValidation';
+import { resolveContactMailConfig, sendContactMail } from '../../utils/contactMail';
+import { getClientIp, jsonError, jsonResponse, readJsonBody } from '../../utils/http';
+import { checkRateLimit } from '../../utils/rateLimit';
+import { getRateLimitStore, readEnvValue } from '../../utils/env';
+import { verifyTurnstileToken } from '../../utils/turnstile';
+import { CONTACT_RATE_LIMIT, MAX_CONTACT_BODY_BYTES } from '../../utils/limits';
+import type { ContactSuccessResponse } from '../../types/api';
 
 export const prerender = false;
 
 /**
  * POST /api/contact
  *
- * Handles contact form submissions:
- * 1. Validates the Cloudflare Turnstile token on the server
- * 2. Forwards the form data to Web3Forms if validation succeeds
- * 3. Returns the result
+ * Validates the Turnstile token server-side and then either sends the mail
+ * from the Worker (Resend, preferred — no credential reaches the browser)
+ * or returns the Web3Forms access key as a legacy fallback for browsers on
+ * the free-tier flow.
  */
-import { env } from "cloudflare:workers";
-
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const cfEnv = env as any;
-    
-    const body = await request.json() as { name: string, email: string, message: string, turnstileToken: string };
-    const { name, email, message, turnstileToken } = body;
-
-    // Validate required fields
-    if (!name || !email || !message) {
-      return new Response(
-        JSON.stringify({ error: 'Faltan campos requeridos' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+    const ip = getClientIp(request);
+    const rate = await checkRateLimit(getRateLimitStore(), `contact:${ip}`, CONTACT_RATE_LIMIT);
+    if (!rate.allowed) {
+      return jsonError(
+        'Demasiadas solicitudes. Intenta de nuevo más tarde.',
+        429,
+        { 'Retry-After': String(rate.retryAfterSeconds) },
+        'RATE_LIMITED',
       );
     }
 
-    if (!turnstileToken) {
-      return new Response(
-        JSON.stringify({ error: 'Token de Turnstile requerido' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Validate Turnstile token on the server
-    const turnstileSecretKey = cfEnv.TURNSTILE_SECRET_KEY || import.meta.env.TURNSTILE_SECRET_KEY;
+    const turnstileSecretKey = readEnvValue('TURNSTILE_SECRET_KEY');
     if (!turnstileSecretKey) {
       console.error('TURNSTILE_SECRET_KEY no configurada');
-      return new Response(
-        JSON.stringify({ error: 'Error en la configuración del servidor' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
+      return jsonError('Error en la configuración del servidor', 500);
     }
 
-    const turnstileValidationResponse = await fetch(
-      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          secret: turnstileSecretKey,
-          response: turnstileToken
-        })
+    const body = await readJsonBody(request, MAX_CONTACT_BODY_BYTES);
+    if (!body.ok) return jsonError(body.error, body.status, {}, body.code);
+
+    let payload: ReturnType<typeof validateContactPayload>;
+    try {
+      payload = validateContactPayload(body.data);
+    } catch (error) {
+      if (error instanceof ContactValidationError) {
+        return jsonError(error.message, 400, {}, 'INVALID_CONTACT_REQUEST');
       }
-    );
-
-    const turnstileResult = await turnstileValidationResponse.json() as { success: boolean, 'error-codes'?: string[] };
-
-    if (!turnstileResult.success) {
-      console.error('Turnstile validation failed:', turnstileResult);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Validación de seguridad fallida',
-          details: turnstileResult['error-codes'] || []
-        }),
-        { status: 403, headers: { 'Content-Type': 'application/json' } }
-      );
+      throw error;
     }
 
-    // If Turnstile validation passed, return the Web3Forms access key
-    // We CANNOT send the request from the server because Web3Forms free tier blocks Node.js (returns 403 Cloudflare challenge)
-    const web3formsAccessKey = cfEnv.WEB3FORMS_ACCESS_KEY || import.meta.env.WEB3FORMS_ACCESS_KEY;
+    const verification = await verifyTurnstileToken(
+      payload.turnstileToken,
+      turnstileSecretKey,
+      { remoteIp: ip },
+    );
+
+    if (!verification.success) {
+      console.error('Turnstile validation failed:', verification.errorCodes);
+      return jsonError('Validación de seguridad fallida', 403, {}, 'TURNSTILE_FAILED');
+    }
+
+    const mailConfig = resolveContactMailConfig({
+      RESEND_API_KEY: readEnvValue('RESEND_API_KEY'),
+      RESEND_FROM: readEnvValue('RESEND_FROM'),
+      CONTACT_TO_EMAIL: readEnvValue('CONTACT_TO_EMAIL'),
+    });
+
+    if (mailConfig) {
+      const sent = await sendContactMail(mailConfig, {
+        name: payload.name,
+        email: payload.email,
+        message: payload.message,
+      });
+      if (!sent.ok) {
+        console.error('Contact mail send failed:', sent.error);
+        return jsonError(sent.error, 502, {}, 'MAIL_SEND_FAILED');
+      }
+      const serverResponse: ContactSuccessResponse = { success: true, sent: 'server' };
+      return jsonResponse(serverResponse);
+    }
+
+    // Legacy fallback: Web3Forms only accepts browser submissions, which
+    // means exposing the access key. Prefer configuring RESEND_API_KEY.
+    const web3formsAccessKey = readEnvValue('WEB3FORMS_ACCESS_KEY');
     if (!web3formsAccessKey) {
-      console.error('WEB3FORMS_ACCESS_KEY no configurada');
-      return new Response(
-        JSON.stringify({ error: 'Error en la configuración del servidor' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
+      console.error('Ni RESEND_API_KEY ni WEB3FORMS_ACCESS_KEY configuradas');
+      return jsonError('Error en la configuración del servidor', 500);
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        accessKey: web3formsAccessKey
-      }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
+    const responseBody: ContactSuccessResponse = {
+      success: true,
+      sent: 'browser',
+      accessKey: web3formsAccessKey,
+    };
+    return jsonResponse(responseBody);
   } catch (error) {
     console.error('Contact API error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Error interno del servidor' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return jsonError('Error interno del servidor', 500);
   }
 };
