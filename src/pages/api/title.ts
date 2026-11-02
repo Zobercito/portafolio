@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getGroqClient } from '../../utils/groqClient';
 import { DEFAULT_MODEL } from '../../data/chatModels';
+import { modelCandidates, withModelFallback } from '../../utils/groqFallback';
 import { cleanTitle } from '../../utils/titleCleanup';
 import { TitleValidationError, normalizeTitleRequest } from '../../utils/titleValidation';
 import { getClientIp, jsonError, jsonResponse, readJsonBody } from '../../utils/http';
@@ -63,20 +64,28 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const groq = getGroqClient(readEnvValue('GROQ_API_KEY'));
-    const completion = await groq.chat.completions.create({
-      messages: [
-        { role: 'system', content: TITLE_SYSTEM_PROMPT },
-        {
-          role: 'user',
-          content: `Genera un título para esto:\nUsuario: ${normalized.userMessage}\nAsistente: ${normalized.assistantMessage}`,
-        },
-      ],
-      model: DEFAULT_MODEL.groqId,
-      temperature: 0.3,
-      top_p: 1,
-      reasoning_effort: 'low',
-      max_completion_tokens: 256,
-    });
+    const titleMessages = [
+      { role: 'system' as const, content: TITLE_SYSTEM_PROMPT },
+      {
+        role: 'user' as const,
+        content: `Genera un título para esto:\nUsuario: ${normalized.userMessage}\nAsistente: ${normalized.assistantMessage}`,
+      },
+    ];
+
+    const { result: completion } = await withModelFallback(
+      modelCandidates(DEFAULT_MODEL),
+      (model) =>
+        groq.chat.completions.create({
+          messages: titleMessages,
+          model: model.groqId,
+          temperature: 0.3,
+          top_p: 1,
+          reasoning_effort: 'low',
+          max_completion_tokens: 256,
+        }),
+      (failed, next, error) =>
+        console.warn(`Groq: título con ${failed.groqId} falló, se reintenta con ${next.groqId}`, error),
+    );
 
     const title = cleanTitle(completion.choices[0]?.message?.content);
     const responseBody: TitleResponse = { title };

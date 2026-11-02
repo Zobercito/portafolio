@@ -12,6 +12,7 @@ import {
   readEnvValue,
 } from '../../utils/env';
 import { isChatSessionValid } from '../../utils/chatSession';
+import { modelCandidates, withModelFallback } from '../../utils/groqFallback';
 import { formatSseEvent } from '../../utils/sse';
 import {
   CHAT_PER_SESSION_RATE_LIMIT,
@@ -96,18 +97,26 @@ export const POST: APIRoute = async ({ request }) => {
       request.signal.removeEventListener('abort', onClientDisconnect);
     };
 
-    const completion = await groq.chat.completions.create(
-      {
-        messages: groqMessages,
-        model: modelConfig.groqId,
-        temperature: modelConfig.temperature,
-        top_p: modelConfig.topP,
-        reasoning_effort: modelConfig.reasoningEffort,
-        max_completion_tokens: modelConfig.maxCompletionTokens,
-        stream: true,
-      },
-      { signal: upstream.signal },
-    );
+    const completion = (
+      await withModelFallback(
+        modelCandidates(modelConfig),
+        (model) =>
+          groq.chat.completions.create(
+            {
+              messages: groqMessages,
+              model: model.groqId,
+              temperature: model.temperature,
+              top_p: model.topP,
+              reasoning_effort: model.reasoningEffort,
+              max_completion_tokens: model.maxCompletionTokens,
+              stream: true,
+            },
+            { signal: upstream.signal },
+          ),
+        (failed, next, error) =>
+          console.warn(`Groq: modelo ${failed.groqId} no disponible, se reintenta con ${next.groqId}`, error),
+      )
+    ).result;
 
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
