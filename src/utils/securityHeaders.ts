@@ -1,27 +1,52 @@
 /**
- * Security headers applied by the SSR middleware. The CSP is report-only for
- * now because the page relies on Astro hydration scripts and inline styles;
- * promote it to an enforcing header once the console is clean.
+ * Cabeceras de seguridad que pone el middleware sobre las respuestas del
+ * Worker (API y páginas renderizadas en cada petición).
  *
- * Keep this policy in sync with `public/_headers`, which covers the
- * prerendered landing and static assets (middleware does not run for them).
+ * La política de CSP se aplica de verdad, no en modo `Report-Only`. Para que
+ * esto funcione, `script-src` no lleva `'unsafe-inline'`: los pocos scripts
+ * inline que hay van autorizados por su hash. En las páginas prerenderizadas
+ * esos hashes los añade `scripts/apply-csp.mjs` sobre `dist/client/_headers`
+ * después del build; aquí no hacen falta porque las respuestas del Worker (JSON
+ * de API y el 404) no meten scripts inline en el documento.
+ *
+ * `style-src` sí conserva `'unsafe-inline'`: el HTML lleva decenas de
+ * atributos `style=` (posicionamiento del canvas, rellenos de los SVG) y un
+ * hash por atributo no es viable. Autorizar CSS no ejecuta código; el riesgo
+ * que se cierra con esta política es el JavaScript inline.
+ *
+ * Mantener en sincronía con `public/_headers`, que cubre la landing
+ * prerenderizada y los assets estáticos (aquí el middleware no llega a correr).
  */
-const CONTENT_SECURITY_POLICY = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "frame-ancestors 'none'",
-  "form-action 'self'",
-  "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
-  "style-src 'self' 'unsafe-inline'",
-  "font-src 'self' data:",
-  "img-src 'self' data: blob: https://cdn.jsdelivr.net",
-  "media-src 'self'",
-  "connect-src 'self' https://challenges.cloudflare.com",
-  "frame-src https://challenges.cloudflare.com",
-  "worker-src 'self' blob:",
-  "manifest-src 'self'",
-].join('; ');
+
+export function buildContentSecurityPolicy(scriptHashes: readonly string[] = []): string {
+  // Las expresiones de origen con base64 van entre comillas simples: `+`, `/` y
+  // `=` no son caracteres válidos sin entrecomillar y el navegador descartaría
+  // la política entera.
+  const scriptSrc = [
+    "'self'",
+    ...scriptHashes.map((hash) => `'${hash}'`),
+    'https://challenges.cloudflare.com',
+  ].join(' ');
+
+  return [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    `script-src ${scriptSrc}`,
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self' data:",
+    "img-src 'self' data: blob: https://cdn.jsdelivr.net https://github.com",
+    "media-src 'self'",
+    "connect-src 'self' https://challenges.cloudflare.com",
+    "frame-src https://challenges.cloudflare.com",
+    "worker-src 'self' blob:",
+    "manifest-src 'self'",
+  ].join('; ');
+}
+
+export const CONTENT_SECURITY_POLICY = buildContentSecurityPolicy();
 
 export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
   'X-Content-Type-Options': 'nosniff',
@@ -29,7 +54,5 @@ export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
   'X-Frame-Options': 'DENY',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
   'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
-  'Content-Security-Policy-Report-Only': CONTENT_SECURITY_POLICY,
+  'Content-Security-Policy': CONTENT_SECURITY_POLICY,
 };
-
-export { CONTENT_SECURITY_POLICY };

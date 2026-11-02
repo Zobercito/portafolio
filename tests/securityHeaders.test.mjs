@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   CONTENT_SECURITY_POLICY,
   SECURITY_HEADERS,
+  buildContentSecurityPolicy,
 } from '../src/utils/securityHeaders.ts';
 
 test('aplica las cabeceras de seguridad básicas', () => {
@@ -17,6 +18,32 @@ test('aplica las cabeceras de seguridad básicas', () => {
   assert.match(SECURITY_HEADERS['Permissions-Policy'], /camera=\(\)/);
 });
 
+test('la CSP se aplica, no sólo se informa', () => {
+  assert.equal(SECURITY_HEADERS['Content-Security-Policy'], CONTENT_SECURITY_POLICY);
+  assert.equal(SECURITY_HEADERS['Content-Security-Policy-Report-Only'], undefined);
+});
+
+test('script-src no permite código inline sin hash', () => {
+  assert.doesNotMatch(CONTENT_SECURITY_POLICY, /script-src[^;]*unsafe-inline/);
+  assert.match(CONTENT_SECURITY_POLICY, /script-src 'self' https:\/\/challenges\.cloudflare\.com/);
+});
+
+test('los hashes de script van entrecomillados y en orden', () => {
+  const policy = buildContentSecurityPolicy(['sha256-abc=', 'sha256-def/g+']);
+  assert.match(
+    policy,
+    /script-src 'self' 'sha256-abc=' 'sha256-def\/g\+' https:\/\/challenges\.cloudflare\.com/,
+  );
+  // Sin hashes la política del Worker (API y 404) no menciona `sha256`.
+  assert.doesNotMatch(buildContentSecurityPolicy(), /sha256/);
+});
+
+test('style-src admite los atributos style= del HTML prerenderizado', () => {
+  // El canvas, el track del slider y los SVG de los iconos llevan `style=` en
+  // el marcado; autorizar CSS no ejecuta JavaScript.
+  assert.match(CONTENT_SECURITY_POLICY, /style-src 'self' 'unsafe-inline'/);
+});
+
 test('la CSP permite Turnstile y ya no abre el formulario a Web3Forms', () => {
   assert.match(CONTENT_SECURITY_POLICY, /script-src[^;]*challenges\.cloudflare\.com/);
   assert.match(CONTENT_SECURITY_POLICY, /frame-src https:\/\/challenges\.cloudflare\.com/);
@@ -24,6 +51,10 @@ test('la CSP permite Turnstile y ya no abre el formulario a Web3Forms', () => {
   assert.match(CONTENT_SECURITY_POLICY, /form-action 'self'/);
   assert.match(CONTENT_SECURITY_POLICY, /img-src[^;]*cdn\.jsdelivr\.net/);
   assert.doesNotMatch(CONTENT_SECURITY_POLICY, /web3forms\.com/);
+});
+
+test('la CSP deja cargar el avatar de GitHub de la tarjeta de actividad', () => {
+  assert.match(CONTENT_SECURITY_POLICY, /img-src[^;]*github\.com/);
 });
 
 test('la CSP ya no depende de Google Fonts', () => {
@@ -39,7 +70,9 @@ test('la CSP declara defaults restrictivos', () => {
   assert.match(CONTENT_SECURITY_POLICY, /media-src 'self'/);
 });
 
-test('la CSP no incluye directivas ignoradas en modo Report-Only', () => {
-  // Browsers discard upgrade-insecure-requests when the policy is report-only.
+test('la CSP no declara destinos de reporte que no existen', () => {
+  // Sin collector no tiene sentido prometer reportes: los navegadores sólo los
+  // enviarían si la política se rompiera, y ahí preferimos un fallo visible.
+  assert.doesNotMatch(CONTENT_SECURITY_POLICY, /report-(uri|to)/);
   assert.doesNotMatch(CONTENT_SECURITY_POLICY, /upgrade-insecure-requests/);
 });

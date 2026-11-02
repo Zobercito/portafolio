@@ -84,6 +84,7 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
    npm test
    npm run build
    npm run test:e2e
+   npm run test:csp
    ```
 
    CI runs the same commands on every push and pull request (`.github/workflows/ci.yml`).
@@ -98,13 +99,30 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
      mcr.microsoft.com/playwright:v1.64.1-noble npx playwright test --update-snapshots
    ```
 
+   **Content Security Policy.** The site ships an enforcing
+   `Content-Security-Policy` whose `script-src` has no `'unsafe-inline'`: the few
+   inline scripts Astro leaves in the HTML are authorized by their `sha256-…`.
+   `scripts/apply-csp.mjs` (run at the end of `npm run build`) recomputes those
+   hashes from `dist/client/*.html` and rewrites the CSP line of
+   `dist/client/_headers`, so the policy deployed always matches the bytes being
+   served. The directives themselves live in `src/utils/securityHeaders.ts`;
+   `public/_headers` is only the starting point. Under `astro dev` the header
+   degrades to `Content-Security-Policy-Report-Only`, because Vite injects its own
+   inline scripts that no build-time hash covers.
+
+   `test:csp` boots the real artifact (`wrangler dev -c wrangler.deploy.toml`) and
+   fails if the browser reports a single `securitypolicyviolation` while hydrating
+   the landing, loading Turnstile or rendering the 404. It's the check that catches
+   a new third-party origin or an inline script that nobody authorized.
+
 5. **Smoke post-despliegue:**
    ```sh
    npm run smoke                                # contra https://zobercito.dev
    node scripts/smoke.mjs https://otra-url.dev  # contra otra instancia
    ```
-   Comprueba la landing prerrenderizada con sus cabeceras de seguridad, los
-   assets inmutables, `/api/config`, que `/api/chat` exija sesión y que
+   Comprueba la landing prerrenderizada con sus cabeceras de seguridad (si la CSP
+   ya aplica, verifica que cada script inline del HTML está autorizado por su hash),
+   los assets inmutables, `/api/config`, que `/api/chat` exija sesión y que
    `/api/chat/session` y `/api/contact` rechacen un token de Turnstile falso,
    además de sitemap, robots y el 404. No envía correos ni gasta cuota de Groq.
    Se lanza a mano y a diario desde `.github/workflows/smoke.yml`.

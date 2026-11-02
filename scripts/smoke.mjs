@@ -7,6 +7,8 @@
  * chat y el contacto envían un token de Turnstile falso, así que no se manda
  * ningún correo ni se gasta cuota de Groq.
  */
+import { cspHash, extractInlineScripts } from '../src/utils/cspHashes.ts';
+
 const BASE_URL = (process.argv[2] || process.env.SMOKE_BASE_URL || 'https://zobercito.dev')
   .replace(/\/+$/, '');
 const REQUEST_TIMEOUT_MS = 20_000;
@@ -55,7 +57,6 @@ const checks = [
       assert(/<title>[^<]+<\/title>/.test(res.text), 'el HTML no tiene <title>');
       assert(res.text.includes('astro-island'), 'no hay islas de React en el HTML');
       for (const header of [
-        'content-security-policy-report-only',
         'strict-transport-security',
         'x-content-type-options',
         'x-frame-options',
@@ -63,6 +64,27 @@ const checks = [
         'permissions-policy',
       ]) {
         assert(res.headers.get(header), `falta la cabecera ${header}`);
+      }
+
+      // La CSP puede llegar aún en modo Report-Only en despliegues viejos; si ya
+      // aplica, cada script inline del HTML tiene que estar autorizado por hash.
+      const csp =
+        res.headers.get('content-security-policy') ??
+        res.headers.get('content-security-policy-report-only');
+      assert(csp, 'falta la cabecera Content-Security-Policy');
+      const enforcing = res.headers.get('content-security-policy');
+      if (enforcing) {
+        assert(!/script-src[^;]*unsafe-inline/.test(enforcing), 'script-src sigue con unsafe-inline');
+        const scriptHashes = await Promise.all(
+          extractInlineScripts(res.text).map((script) => cspHash(script.code)),
+        );
+        assert(scriptHashes.length > 0, 'el HTML no trae scripts inline que comprobar');
+        for (const hash of scriptHashes) {
+          assert(
+            enforcing.includes(`'${hash}'`),
+            `el script inline ${hash} no está en la CSP y no hidratará`,
+          );
+        }
       }
       assert(!res.text.includes('Internal Server Error'), 'la landing devolvió un error interno');
     },
