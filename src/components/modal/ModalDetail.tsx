@@ -1,4 +1,5 @@
 import type { ModalItemData } from '../ModalOverlay';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 
 interface ModalDetailProps {
   item: ModalItemData;
@@ -11,6 +12,8 @@ interface ModalDetailProps {
 }
 
 export function ModalDetail({ item, showNavigation, onPrev, onNext, onBack, detailRef, category }: ModalDetailProps) {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   return (
     <div
       ref={detailRef}
@@ -49,9 +52,34 @@ export function ModalDetail({ item, showNavigation, onPrev, onNext, onBack, deta
 
       {/* Content body */}
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-zinc-950">
-        {item.image && (
+        {(item.video || item.image) && (
           <div className="relative w-full bg-zinc-900 border-b border-zinc-800/80">
-            <img src={item.image} alt={item.title} className="w-full h-auto max-h-[45vh] xl:max-h-[50vh] object-contain mx-auto" />
+            {item.video ? (
+              <video
+                src={item.video}
+                poster={item.image}
+                width={item.imageWidth}
+                height={item.imageHeight}
+                controls
+                muted
+                loop
+                playsInline
+                autoPlay={!prefersReducedMotion}
+                preload="metadata"
+                aria-label={item.title}
+                className="w-full h-auto max-h-[45vh] xl:max-h-[50vh] object-contain mx-auto"
+              />
+            ) : (
+              <img
+                src={item.image}
+                alt={item.title}
+                width={item.imageWidth}
+                height={item.imageHeight}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-auto max-h-[45vh] xl:max-h-[50vh] object-contain mx-auto"
+              />
+            )}
 
             {showNavigation && (
               <>
@@ -87,7 +115,7 @@ export function ModalDetail({ item, showNavigation, onPrev, onNext, onBack, deta
           )}
           {item.skills && item.skills.length > 0 && (
             <div className="mt-4 pt-4 border-t border-zinc-800/60">
-              <h5 className="text-xs sm:text-sm uppercase tracking-widest text-zinc-500 font-medium mb-2.5">
+              <h5 className="text-xs sm:text-sm uppercase tracking-widest text-zinc-400 font-medium mb-2.5">
                 {category === 'Proyectos' ? 'Tecnologías utilizadas:' : 'Tecnologías y conocimientos aprendidos:'}
               </h5>
               <div className="flex flex-wrap justify-center gap-2">

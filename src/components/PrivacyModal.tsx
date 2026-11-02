@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalAnimation } from '../hooks/useModalAnimation';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface PrivacyModalProps {
   isOpen: boolean;
@@ -11,6 +12,9 @@ interface PrivacyModalProps {
 export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
   const { shouldRender, showAnim } = useModalAnimation(isOpen);
   useBodyScrollLock(isOpen);
+
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, shouldRender);
 
   // Handle escape key and clicks outside
   useEffect(() => {
@@ -37,6 +41,7 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className={`relative w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-950/90 p-6 sm:p-8 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           showAnim ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         }`}
@@ -70,7 +75,7 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
                 <strong>Formulario de contacto:</strong> Nombre y correo (voluntarios). Se procesan a través de <strong>Web3Forms</strong> para que los pueda recibir y responderte. Este servicio cuenta con su propia política de privacidad orientada a la protección de datos.
               </li>
               <li>
-                <strong>Chat con IA:</strong> Tus mensajes se envían a la <strong>Groq API</strong> para generar respuestas en tiempo real. Groq no retiene ni utiliza estos datos para entrenar modelos. No se guardan copias en mis servidores. Puedes consultar su <a href="https://groq.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-zinc-300 underline hover:text-zinc-100 transition-colors">política de privacidad</a> para más detalle.
+                <strong>Chat con IA:</strong> Tus mensajes se envían a la <strong>Groq API</strong> para generar respuestas en tiempo real. Groq no retiene ni utiliza estos datos para entrenar modelos. No se guardan copias en mis servidores. Las conversaciones se guardan solo en memoria, en la pestaña actual, y se pierden al recargar la página. Puedes consultar su <a href="https://groq.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-zinc-300 underline hover:text-zinc-100 transition-colors">política de privacidad</a> para más detalle.
               </li>
               <li>
                 <strong>Seguridad:</strong> Utilizo <strong>Cloudflare Turnstile</strong> para bloquear spam y bots sin rastrearte de forma invasiva.

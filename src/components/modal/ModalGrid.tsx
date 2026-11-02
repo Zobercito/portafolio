@@ -15,17 +15,27 @@ export function ModalGrid({ title, items, onSelect }: ModalGridProps) {
           const imageUrl = isObj ? (item as ModalItemData).image : null;
           const itemTitle = isObj ? (item as ModalItemData).title : '';
 
+          const isInteractive = Boolean(isObj && imageUrl);
+
           return (
             <div
               key={`${title}-${index}`}
-              onClick={() => isObj && imageUrl ? onSelect(item as ModalItemData) : undefined}
+              role={isInteractive ? 'button' : undefined}
+              tabIndex={isInteractive ? 0 : undefined}
+              aria-label={isInteractive ? `Ampliar ${itemTitle}` : undefined}
+              onClick={() => isInteractive ? onSelect(item as ModalItemData) : undefined}
+              onKeyDown={(event) => {
+                if (!isInteractive || (event.key !== 'Enter' && event.key !== ' ')) return;
+                event.preventDefault();
+                onSelect(item as ModalItemData);
+              }}
               className={`group relative flex flex-col h-56 sm:h-64 items-center justify-center overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-950/40 transition-all duration-300 hover:border-zinc-500/80 hover:bg-zinc-800/40 hover:-translate-y-1.5 hover:shadow-2xl ${
-                isObj && imageUrl ? 'cursor-pointer p-0' : 'p-6'
+                isInteractive ? 'cursor-pointer p-0' : 'p-6'
               }`}
             >
               {imageUrl ? (
                 <>
-                  <img src={imageUrl} alt={itemTitle} draggable={false} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
+                  <img src={imageUrl} alt={itemTitle} draggable={false} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
                   <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 flex flex-col items-center text-center translate-y-3 group-hover:translate-y-0 transition-transform duration-300 ease-out">
                     <span className="text-zinc-100 font-semibold text-sm sm:text-base drop-shadow-md">{itemTitle}</span>

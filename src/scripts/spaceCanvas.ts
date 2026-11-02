@@ -131,18 +131,32 @@ export function initSpaceCanvas() {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
+  const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
   let width = 0;
   let height = 0;
   let stars: Star[] = [];
   let shootingStars: ShootingStar[] = [];
+  let frameId: number | null = null;
+  let running = false;
 
   function resize() {
-    width = canvas!.width = window.innerWidth;
-    height = canvas!.height = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas!.width = Math.round(width * dpr);
+    canvas!.height = Math.round(height * dpr);
+    ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
     stars = [];
     for (let i = 0; i < STAR_COUNT; i++) {
       stars.push(new Star(true, width, height));
     }
+    if (motionQuery.matches) drawStatic();
+  }
+
+  function drawStatic() {
+    ctx!.clearRect(0, 0, width, height);
+    stars.forEach((s) => s.draw(ctx!));
   }
 
   function animate() {
@@ -159,10 +173,36 @@ export function initSpaceCanvas() {
       s.draw(ctx!);
       return !s.dead;
     });
-    requestAnimationFrame(animate);
+    frameId = requestAnimationFrame(animate);
   }
 
+  function start() {
+    if (running || motionQuery.matches || document.hidden) return;
+    running = true;
+    frameId = requestAnimationFrame(animate);
+  }
+
+  function stop() {
+    running = false;
+    if (frameId !== null) cancelAnimationFrame(frameId);
+    frameId = null;
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  motionQuery.addEventListener("change", () => {
+    if (motionQuery.matches) {
+      stop();
+      drawStatic();
+    } else {
+      start();
+    }
+  });
+
   resize();
-  animate();
+  start();
   window.addEventListener("resize", resize);
 }

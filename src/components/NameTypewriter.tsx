@@ -1,11 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
+import { navigateToSection } from '../utils/navigation';
 
 interface NameTypewriterProps {
   firstName: string;
   lastName: string;
   speed?: number;
   enableErrorAnimation?: boolean;
-  onArrowClick?: () => void;
 }
 
 type Phase =
@@ -27,7 +27,6 @@ export default function NameTypewriter({
   lastName,
   speed = 1000,
   enableErrorAnimation = true,
-  onArrowClick,
 }: NameTypewriterProps) {
   const [phase, setPhase] = useState<Phase>('first');
   const [cursorLine, setCursorLine] = useState<CursorLine>('first');
@@ -87,6 +86,15 @@ export default function NameTypewriter({
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setTypedFirst(firstName);
+      setTypedLast(lastName);
+      setCursorLine('last');
+      setIsTyping(false);
+      setHasFinishedTyping(true);
+      return;
+    }
 
     if (phase === 'first') {
       let i = 1;
@@ -186,12 +194,7 @@ export default function NameTypewriter({
   const handleArrowClick = () => {
     hasDismissedArrow.current = true;
     setShowArrow(false);
-    if (onArrowClick) {
-      onArrowClick();
-    } else {
-      // Fallback to manual scroll or safe default if no handler is provided
-      window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
-    }
+    navigateToSection(1);
   };
 
   const cursorClass = `cursor${isTyping ? '' : ' blinking'}`;
@@ -214,14 +217,14 @@ export default function NameTypewriter({
       <h1 className="mb-6 sm:mb-8 leading-[1.05] tracking-tight">
         <span className="block text-[clamp(2.8rem,9vw,7rem)] font-semibold text-zinc-100 relative w-fit">
           {typedFirst}
-          <span className={`${cursorLine === 'first' ? cursorClass : 'opacity-0'} absolute -right-[0.6em] top-0`}>_</span>
+          <span aria-hidden="true" className={`${cursorLine === 'first' ? cursorClass : 'opacity-0'} absolute -right-[0.6em] top-0`}>_</span>
         </span>
         <span
           className={`block text-[clamp(2.8rem,9vw,7rem)] font-semibold text-zinc-300 relative w-fit ${phase === 'last-error-pause' ? 'squiggly-error' : ''}`}
           style={{ visibility: cursorLine === 'first' ? 'hidden' : 'visible' }}
         >
           {secondLineContent}
-          <span className={`${cursorLine === 'last' ? cursorClass : 'opacity-0'} absolute -right-[0.6em] top-0`}>_</span>
+          <span aria-hidden="true" className={`${cursorLine === 'last' ? cursorClass : 'opacity-0'} absolute -right-[0.6em] top-0`}>_</span>
         </span>
       </h1>
 

@@ -16,6 +16,14 @@ export function useCarousel({ speed = 0.03, pauseDuration = 1500 }: UseCarouselP
     let animationId: number;
     let lastTime = performance.now();
     let isVisible = false;
+    let isDocumentVisible = !document.hidden;
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const onVisibilityChange = () => {
+      isDocumentVisible = !document.hidden;
+      if (isDocumentVisible) lastTime = performance.now();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -45,7 +53,7 @@ export function useCarousel({ speed = 0.03, pauseDuration = 1500 }: UseCarouselP
             exactScrollLeft.current += difference * lerpFactor;
           }
           scrollRef.current.scrollLeft = exactScrollLeft.current;
-        } else if (!isHovered && !isManuallyPaused.current) {
+        } else if (!isHovered && !isManuallyPaused.current && isDocumentVisible && !motionQuery.matches) {
           exactScrollLeft.current += speed * delta;
           scrollRef.current.scrollLeft = exactScrollLeft.current;
         }
@@ -69,6 +77,7 @@ export function useCarousel({ speed = 0.03, pauseDuration = 1500 }: UseCarouselP
     return () => {
       cancelAnimationFrame(animationId);
       observer.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [isHovered, speed]);
 

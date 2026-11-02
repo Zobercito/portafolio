@@ -89,7 +89,7 @@ export default function ExperienceLayout() {
                 <div key={idx} className="flex flex-col gap-2 xl:gap-3">
                   <div className="flex items-start gap-2 xl:gap-4">
                     <a href={exp.companyUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block shrink-0 transition-transform duration-300 hover:scale-110">
-                      <img src={exp.logo} alt={exp.company} loading="lazy" decoding="async" className="h-8 w-8 xl:h-14 xl:w-14 rounded-md xl:rounded-lg border border-zinc-700/80 shadow-[0_4px_8px_rgba(0,0,0,0.35)] [image-rendering:high-quality]" />
+                      <img src={exp.logo} alt={exp.company} width={128} height={128} loading="lazy" decoding="async" className="h-8 w-8 xl:h-14 xl:w-14 rounded-md xl:rounded-lg border border-zinc-700/80 shadow-[0_4px_8px_rgba(0,0,0,0.35)] [image-rendering:high-quality]" />
                     </a>
 
                     <div className="min-w-0 flex-1">
@@ -157,7 +157,7 @@ export default function ExperienceLayout() {
               {education.map((edu, idx) => (
                 <div key={idx} className="flex items-start gap-2 xl:gap-4">
                   <a href={edu.institutionUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block shrink-0 transition-transform duration-300 hover:scale-110">
-                    <img src={edu.logo} alt={edu.institution} loading="lazy" decoding="async" className="h-8 w-8 xl:h-14 xl:w-14 rounded-md xl:rounded-lg border border-zinc-700/80 shadow-[0_4px_8px_rgba(0,0,0,0.35)] object-cover" />
+                    <img src={edu.logo} alt={edu.institution} width={128} height={128} loading="lazy" decoding="async" className="h-8 w-8 xl:h-14 xl:w-14 rounded-md xl:rounded-lg border border-zinc-700/80 shadow-[0_4px_8px_rgba(0,0,0,0.35)] object-cover" />
                   </a>
                   <div className="min-w-0 flex-1">
                     <h4 className="text-xs sm:text-sm xl:text-lg font-medium text-zinc-100 leading-tight">
@@ -204,7 +204,7 @@ export default function ExperienceLayout() {
                       className="relative group/icon flex flex-col items-center justify-start shrink-0 transition-transform hover:-translate-y-1.5 w-9 sm:w-10 xl:w-11 h-13 sm:h-15 xl:h-17"
                       title={icon.name}
                     >
-                      <img src={icon.url} alt={icon.name} loading="lazy" decoding="async" className="h-8 w-8 sm:h-10 sm:w-10 xl:h-11 xl:w-11 object-contain opacity-80 transition-opacity group-hover/icon:opacity-100" />
+                      <img src={icon.url} alt={icon.name} width={128} height={128} loading="lazy" decoding="async" className="h-8 w-8 sm:h-10 sm:w-10 xl:h-11 xl:w-11 object-contain opacity-80 transition-opacity group-hover/icon:opacity-100" />
                       <span className="block absolute bottom-0 left-1/2 -translate-x-1/2 text-[8px] sm:text-[9px] xl:text-[10px] font-medium tracking-[0.08em] text-zinc-400 group-hover/icon:text-zinc-200 transition-colors uppercase whitespace-nowrap">
                         {icon.name}
                       </span>

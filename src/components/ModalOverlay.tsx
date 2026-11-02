@@ -3,12 +3,16 @@ import { createPortal } from 'react-dom';
 import { filterValidItems } from '../utils/modalUtils';
 import { useModalAnimation } from '../hooks/useModalAnimation';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { ModalGrid } from './modal/ModalGrid';
 import { ModalDetail } from './modal/ModalDetail';
 
 export interface ModalItemData {
   title?: string;
   image?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  video?: string;
   description?: string;
   url?: string;
   skills?: string[];
@@ -29,6 +33,9 @@ export default function ModalOverlay({ isOpen, title, items, onClose, initialIte
   const [selectedItem, setSelectedItem] = useState<ModalItemData | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const lightboxRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(modalRef, shouldRender && !selectedItem);
+  useFocusTrap(lightboxRef, shouldRender && Boolean(selectedItem));
 
   // Reset or navigate to initial item when modal opens/closes
   useEffect(() => {

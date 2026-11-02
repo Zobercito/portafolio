@@ -47,7 +47,7 @@ export default function MiniGallery({ title, items, gradientClass, onViewAll, on
           onClick={onViewAll}
           className="rounded-full border border-zinc-700 px-2.5 py-0.5 xl:px-3 xl:py-1 text-[9px] xl:text-xs uppercase tracking-[0.18em] text-zinc-300 transition hover:border-zinc-500 hover:text-zinc-100"
         >
-          Ver mas
+          Ver más
         </button>
       </div>
 
@@ -87,19 +87,23 @@ export default function MiniGallery({ title, items, gradientClass, onViewAll, on
               const itemTitle = isObj ? (item as ModalItemData).title : '';
 
               return (
-                <div
+                <button
                   key={`gallery-${index}`}
+                  type="button"
                   onClick={() => imageUrl ? onItemClick(item as ModalItemData) : onViewAll()}
+                  aria-label={imageUrl ? `Ver ${itemTitle}` : `Ver todos: ${title}`}
                   className={`group/mini relative shrink-0 h-full aspect-video rounded-xl xl:rounded-2xl border border-zinc-700/50 flex flex-col items-center justify-center overflow-hidden transition-all hover:border-zinc-500/80 cursor-pointer ${imageUrl ? 'bg-zinc-950 p-0' : 'bg-zinc-900/40 p-3 hover:bg-zinc-800/40'}`}
                 >
                   {imageUrl ? (
                     <>
-                      <img 
-                        src={imageUrl} 
-                        alt={itemTitle} 
-                        loading="lazy" 
-                        decoding="async" 
-                        className="w-full h-full object-cover opacity-80 group-hover/mini:opacity-100 group-hover/mini:scale-110 transition-all duration-500 [image-rendering:high-quality] will-change-transform" 
+                      <img
+                        src={imageUrl}
+                        alt={itemTitle}
+                        width={(item as ModalItemData).imageWidth}
+                        height={(item as ModalItemData).imageHeight}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover opacity-80 group-hover/mini:opacity-100 group-hover/mini:scale-110 transition-all duration-500 [image-rendering:high-quality] will-change-transform"
                       />
                       <div className="absolute inset-0 bg-linear-to-t from-zinc-950/80 to-transparent opacity-30 group-hover/mini:opacity-10 transition-opacity" />
                     </>
@@ -110,7 +114,7 @@ export default function MiniGallery({ title, items, gradientClass, onViewAll, on
                       <div className="w-1/2 h-1.5 xl:h-2 rounded-full bg-zinc-700/40"></div>
                     </>
                   )}
-                </div>
+                </button>
               );
             })}
           </div>

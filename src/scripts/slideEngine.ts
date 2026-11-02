@@ -1,21 +1,37 @@
 // ─── FULL-PAGE SLIDE ENGINE ──────────────────────────────────────────────
 // Manages vertical full-page scroll-snapping via CSS transform.
-// Exposes window.goToSlide for use by React components (e.g. NameTypewriter).
+// Navigation is exposed through the typed `portfolio:navigate` event so React
+// components never depend on a global function.
+
+import { NAVIGATE_EVENT, sectionHash } from "../utils/navigation";
 
 const ANIM_MS = 800; // Should closely match the CSS transition duration
 
 export function initSlideEngine() {
   // Count sections from the DOM so this never goes stale when new sections are added
-  const TOTAL = document.querySelectorAll("[data-section]").length;
-  const track = document.querySelector("[data-slider-track]") as HTMLElement | null;
+  const sections = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-section]"),
+  );
+  const TOTAL = sections.length;
+  const trackEl = document.querySelector("[data-slider-track]");
 
+  if (!(trackEl instanceof HTMLElement) || TOTAL === 0) return;
+  const track = trackEl;
+
+  const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   let current = 0;
   let isAnimating = false;
 
+  function sectionIdForLink(link: Element): string {
+    const href = link.getAttribute("href") ?? "";
+    return href === "/" ? "hero" : href.replace(/^#/, "");
+  }
+
   function updateNav(index: number) {
-    document.querySelectorAll(".nav-link").forEach((link, i) => {
+    const activeId = sections[index]?.id;
+    document.querySelectorAll(".nav-link").forEach((link) => {
       const el = link as HTMLElement;
-      if (i === index) {
+      if (sectionIdForLink(el) === activeId) {
         el.classList.add("bg-zinc-800/60", "text-zinc-100");
         el.classList.remove("text-zinc-400");
       } else {
@@ -25,24 +41,43 @@ export function initSlideEngine() {
     });
   }
 
-  function goTo(index: number) {
+  function goTo(index: number, updateHash = true) {
     if (isAnimating) return;
     if (index < 0 || index >= TOTAL) return;
-    if (!track) return;
     isAnimating = true;
     current = index;
     track.style.transform = `translateY(-${current * 100}svh)`;
     updateNav(current);
+
+    if (updateHash) {
+      history.replaceState(null, "", sectionHash(sections[current].id, current));
+    }
+
     setTimeout(() => {
       isAnimating = false;
-    }, ANIM_MS);
+    }, motionQuery.matches ? 0 : ANIM_MS);
   }
 
-  // Expose goTo globally so React components can call window.goToSlide(n)
-  window.goToSlide = goTo;
+  function indexFromHash(hash: string): number {
+    const id = hash.replace(/^#/, "");
+    if (!id) return 0;
+    return sections.findIndex((section) => section.id === id);
+  }
 
-  // Set initial nav highlight
-  updateNav(current);
+  // Initial nav highlight and deep-link resolution
+  const initialIndex = indexFromHash(window.location.hash);
+  if (initialIndex > 0) goTo(initialIndex, false);
+  else updateNav(current);
+
+  window.addEventListener(NAVIGATE_EVENT, (event) => {
+    const index = (event as CustomEvent<number>).detail;
+    if (typeof index === "number") goTo(index);
+  });
+
+  window.addEventListener("popstate", () => {
+    const index = indexFromHash(window.location.hash);
+    goTo(index >= 0 ? index : 0, false);
+  });
 
   // Mouse wheel / Trackpad
   window.addEventListener(
@@ -118,19 +153,11 @@ export function initSlideEngine() {
   // Navbar link click navigation
   document.querySelectorAll(".nav-link").forEach((link) => {
     link.addEventListener("click", (e) => {
-      const href = link.getAttribute("href");
-      if (!href) return;
-      const targetEl =
-        href === "/"
-          ? document.getElementById("hero")
-          : document.querySelector(href);
-      if (!targetEl) return;
+      const targetId = sectionIdForLink(link);
+      const index = sections.findIndex((section) => section.id === targetId);
+      if (index < 0) return;
       e.preventDefault();
-      const sectionIdx = (targetEl as HTMLElement).dataset.section;
-      if (sectionIdx) {
-        const idx = parseInt(sectionIdx, 10);
-        if (!isNaN(idx)) goTo(idx);
-      }
+      goTo(index);
     });
   });
 }
