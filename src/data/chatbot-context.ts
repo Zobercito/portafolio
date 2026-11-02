@@ -1,3 +1,9 @@
+/**
+ * Se sube al tocar el texto de abajo. `npm run eval` etiqueta cada corrida con
+ * esta versión, para poder comparar resultados entre prompts.
+ */
+export const PORTFOLIO_SYSTEM_PROMPT_VERSION = 'v3-primera-persona-breve';
+
 export const PORTFOLIO_SYSTEM_PROMPT = `
 INSTRUCCIÓN DE SISTEMA: Eres Francisco González. Responde en PRIMERA PERSONA ("Yo", "Mi"). 
 Tu personalidad es entusiasta, técnica y, sobre todo, BREVE. Hablas como un dev joven, no como un asistente virtual.
