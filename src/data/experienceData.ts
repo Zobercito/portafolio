@@ -57,7 +57,10 @@ export const education: Education[] = [
 export const projects: (ModalItemData | string)[] = [
   {
     title: 'Mi Portafolio Web',
-    image: '/img/projects/Portfolio_GIF.gif',
+    image: '/img/projects/Portfolio-poster.webp',
+    video: '/img/projects/Portfolio.mp4',
+    imageWidth: 1280,
+    imageHeight: 720,
     description: 'Plataforma personal interactiva diseñada para centralizar mi trayectoria, certificaciones y proyectos. Cuenta con un diseño premium enfocado en la experiencia de usuario, integrando un chatbot inteligente con IA para consultas dinámicas sobre mi perfil profesional.',
     url: 'https://github.com/Zobercito/portafolio',
     skills: ['Astro', 'React', 'Tailwind CSS', 'TypeScript', 'Cloudflare Workers', 'IA Integration']
@@ -68,13 +71,17 @@ export const projects: (ModalItemData | string)[] = [
 export const certificates: (ModalItemData | string)[] = [
   {
     title: 'Curso de Python e IA - Samsung Innovation Campus',
-    image: '/certs/SIC_2023-Francisco_Gonzalez.jpg',
+    image: '/certs/SIC_2023-Francisco_Gonzalez.webp',
+    imageWidth: 1600,
+    imageHeight: 1132,
     description: 'Certificación de 280 horas de formación técnica avanzada en Python e Inteligencia Artificial. Mi formación se centró en el desarrollo de software full-stack, análisis estadístico y la creación de modelos de Machine Learning y Deep Learning para la resolución de problemas reales y de alto impacto.',
     skills: ['Python', 'Inteligencia Artificial', 'Machine Learning', 'Deep Learning', 'Análisis Estadístico', 'Desarrollo Full-stack']
   },
   {
     title: 'Curso Profesional de Python - Código Facilito',
-    image: '/certs/CursoCodigoFacilito-FranciscoGonzalez.jpg',
+    image: '/certs/CursoCodigoFacilito-FranciscoGonzalez.webp',
+    imageWidth: 1600,
+    imageHeight: 1130,
     description: 'Completé este curso de Python donde aprendí desde los fundamentos hasta conceptos avanzados como decoradores, closures y Programación Orientada a Objetos. Me enfoqué especialmente en dominar listas, tuplas, diccionarios y en escribir funciones y clases limpias, lo que me equipa para desarrollar soluciones fullstack eficientes y escalables.',
     url: 'https://codigofacilito.com/certificates/06d3f966-da18-423f-9baa-46dc227ed710.pdf',
     skills: [
