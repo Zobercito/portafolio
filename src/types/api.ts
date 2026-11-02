@@ -28,8 +28,6 @@ export interface ContactRequest {
 
 export interface ContactSuccessResponse {
   success: true;
-  sent?: 'server' | 'browser';
-  accessKey?: string;
 }
 
 export interface ChatSessionRequest {

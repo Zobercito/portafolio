@@ -16,8 +16,8 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
 - **Framework:** Astro 6 (Cloudflare Workers SSR adapter)
 - **UI Library:** React 19
 - **Styling:** Tailwind CSS 4
-- **AI Integration:** Groq SDK (Llama 3.1, Llama 3.3, and GPT OSS)
-- **Forms & Security:** Web3Forms + Cloudflare Turnstile
+- **AI Integration:** Groq SDK (GPT OSS 120B y Qwen 3.8 27B)
+- **Forms & Security:** envío server-side con Resend + Cloudflare Turnstile
 
 ---
 
@@ -65,7 +65,9 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
    Create a `.env` file in the root based on `.env.example`:
    ```env
    GROQ_API_KEY=your_api_key
-   WEB3FORMS_ACCESS_KEY=your_key
+   RESEND_API_KEY=your_api_key
+   RESEND_FROM=contacto@tudominio.dev
+   CONTACT_TO_EMAIL=tu-correo@tudominio.dev
    PUBLIC_TURNSTILE_SITE_KEY=your_key
    TURNSTILE_SECRET_KEY=your_key
    ```

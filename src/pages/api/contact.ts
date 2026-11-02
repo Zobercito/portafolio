@@ -13,10 +13,8 @@ export const prerender = false;
 /**
  * POST /api/contact
  *
- * Validates the Turnstile token server-side and then either sends the mail
- * from the Worker (Resend, preferred — no credential reaches the browser)
- * or returns the Web3Forms access key as a legacy fallback for browsers on
- * the free-tier flow.
+ * Validates the Turnstile token server-side and sends the mail from the
+ * Worker via Resend, so no mail credential ever reaches the browser.
  */
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -67,33 +65,22 @@ export const POST: APIRoute = async ({ request }) => {
       CONTACT_TO_EMAIL: readEnvValue('CONTACT_TO_EMAIL'),
     });
 
-    if (mailConfig) {
-      const sent = await sendContactMail(mailConfig, {
-        name: payload.name,
-        email: payload.email,
-        message: payload.message,
-      });
-      if (!sent.ok) {
-        console.error('Contact mail send failed:', sent.error);
-        return jsonError(sent.error, 502, {}, 'MAIL_SEND_FAILED');
-      }
-      const serverResponse: ContactSuccessResponse = { success: true, sent: 'server' };
-      return jsonResponse(serverResponse);
-    }
-
-    // Legacy fallback: Web3Forms only accepts browser submissions, which
-    // means exposing the access key. Prefer configuring RESEND_API_KEY.
-    const web3formsAccessKey = readEnvValue('WEB3FORMS_ACCESS_KEY');
-    if (!web3formsAccessKey) {
-      console.error('Ni RESEND_API_KEY ni WEB3FORMS_ACCESS_KEY configuradas');
+    if (!mailConfig) {
+      console.error('Faltan RESEND_API_KEY, RESEND_FROM o CONTACT_TO_EMAIL');
       return jsonError('Error en la configuración del servidor', 500);
     }
 
-    const responseBody: ContactSuccessResponse = {
-      success: true,
-      sent: 'browser',
-      accessKey: web3formsAccessKey,
-    };
+    const sent = await sendContactMail(mailConfig, {
+      name: payload.name,
+      email: payload.email,
+      message: payload.message,
+    });
+    if (!sent.ok) {
+      console.error('Contact mail send failed:', sent.error);
+      return jsonError(sent.error, 502, {}, 'MAIL_SEND_FAILED');
+    }
+
+    const responseBody: ContactSuccessResponse = { success: true };
     return jsonResponse(responseBody);
   } catch (error) {
     console.error('Contact API error:', error);

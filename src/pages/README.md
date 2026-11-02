@@ -7,7 +7,7 @@ This directory defines the routing structure of the Astro site.
 - **`index.astro`**: The entry point of the portfolio (Home Page). It assembles all the sections into the final layout.
 - **`/api`**: Contains server-side endpoints (Astro API Routes).
   - `chat.ts`: Handles communication with the AI models via Groq.
-  - `contact.ts`: Processes the Web3Forms contact form and Turnstile verification.
+  - `contact.ts`: Validates Turnstile and sends the contact mail server-side via Resend.
   - `title.ts`: Utility for dynamic AI chat title generation.
 
 ## 🚀 Astro Routing

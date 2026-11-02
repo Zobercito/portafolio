@@ -72,7 +72,7 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
             <h4 className="text-zinc-200 font-medium mb-2 uppercase tracking-widest text-xs">2. Datos Recogidos</h4>
             <ul className="list-disc pl-5 space-y-3">
               <li>
-                <strong>Formulario de contacto:</strong> Nombre y correo (voluntarios). Se procesan a través de <strong>Web3Forms</strong> para que los pueda recibir y responderte. Este servicio cuenta con su propia política de privacidad orientada a la protección de datos.
+                <strong>Formulario de contacto:</strong> Nombre y correo (voluntarios). El mensaje se envía desde mi servidor a través de <strong>Resend</strong> hasta mi bandeja de entrada para que los pueda recibir y responderte. Este servicio cuenta con su propia política de privacidad orientada a la protección de datos.
               </li>
               <li>
                 <strong>Chat con IA:</strong> Tus mensajes se envían a la <strong>Groq API</strong> para generar respuestas en tiempo real. Groq no retiene ni utiliza estos datos para entrenar modelos. No se guardan copias en mis servidores. Las conversaciones se guardan solo en memoria, en la pestaña actual, y se pierden al recargar la página. Puedes consultar su <a href="https://groq.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-zinc-300 underline hover:text-zinc-100 transition-colors">política de privacidad</a> para más detalle.

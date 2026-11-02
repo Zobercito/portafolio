@@ -8,14 +8,7 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 
 interface ContactApiResponse {
   success: boolean;
-  sent?: 'server' | 'browser';
-  accessKey?: string;
   error?: string;
-}
-
-interface Web3FormsResponse {
-  success: boolean;
-  message?: string;
 }
 
 interface PublicConfigResponse {
@@ -200,7 +193,7 @@ export function initContactForm() {
 
       submitBtn.textContent = "Enviando mensaje...";
 
-      // Verify Turnstile server-side and get the Web3Forms access key
+      // Turnstile se valida en el servidor, que envía el correo por su cuenta
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -210,28 +203,6 @@ export function initContactForm() {
       const data = (await response.json()) as ContactApiResponse;
       if (!response.ok || !data.success) {
         throw new Error(data.error || "Error en la validación de seguridad");
-      }
-
-      // Legacy fallback: Web3Forms submission from the browser. When the
-      // server sends the mail itself there is no accessKey to use.
-      if (data.accessKey) {
-        const web3formsResponse = await fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({
-            access_key: data.accessKey,
-            name,
-            email,
-            message,
-            from_name: "Portafolio Contact Form",
-            subject: `Nuevo mensaje de ${name} desde Portafolio`,
-          }),
-        });
-
-        const web3Result = (await web3formsResponse.json()) as Web3FormsResponse;
-        if (!web3formsResponse.ok || !web3Result.success) {
-          throw new Error(web3Result.message || "Error al enviar el mensaje");
-        }
       }
 
       setStatus('success', "¡Mensaje enviado! Gracias por escribirme.");

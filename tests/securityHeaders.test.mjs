@@ -17,12 +17,13 @@ test('aplica las cabeceras de seguridad básicas', () => {
   assert.match(SECURITY_HEADERS['Permissions-Policy'], /camera=\(\)/);
 });
 
-test('la CSP permite Turnstile y Web3Forms', () => {
+test('la CSP permite Turnstile y ya no abre el formulario a Web3Forms', () => {
   assert.match(CONTENT_SECURITY_POLICY, /script-src[^;]*challenges\.cloudflare\.com/);
   assert.match(CONTENT_SECURITY_POLICY, /frame-src https:\/\/challenges\.cloudflare\.com/);
-  assert.match(CONTENT_SECURITY_POLICY, /connect-src[^;]*api\.web3forms\.com/);
-  assert.match(CONTENT_SECURITY_POLICY, /form-action[^;]*api\.web3forms\.com/);
+  assert.match(CONTENT_SECURITY_POLICY, /connect-src[^;]*challenges\.cloudflare\.com/);
+  assert.match(CONTENT_SECURITY_POLICY, /form-action 'self'/);
   assert.match(CONTENT_SECURITY_POLICY, /img-src[^;]*cdn\.jsdelivr\.net/);
+  assert.doesNotMatch(CONTENT_SECURITY_POLICY, /web3forms\.com/);
 });
 
 test('la CSP ya no depende de Google Fonts', () => {

@@ -16,7 +16,6 @@ export interface RuntimeEnv {
   GROQ_API_KEY?: string;
   PUBLIC_TURNSTILE_SITE_KEY?: string;
   TURNSTILE_SECRET_KEY?: string;
-  WEB3FORMS_ACCESS_KEY?: string;
   RESEND_API_KEY?: string;
   RESEND_FROM?: string;
   CONTACT_TO_EMAIL?: string;
