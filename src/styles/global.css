@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300 600;
+  font-display: swap;
+  src: url('/fonts/inter-latin-var.woff2') format('woff2');
+}
+
 @layer base {
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -153,4 +161,45 @@
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
   animation: shimmer 1.5s infinite;
+}
+
+/* Inline contact form feedback */
+.contact-status {
+  min-height: 1.25rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: rgb(161 161 170);
+}
+.contact-status[data-kind='success'] {
+  color: rgb(74 222 128);
+}
+.contact-status[data-kind='error'] {
+  color: rgb(248 113 113);
+}
+
+/* Respect the user's motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Entrance animations must not leave content invisible */
+  .animate-fade-up,
+  .animate-fade-in-down,
+  .delay-3,
+  .delay-4 {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .down-arrow,
+  .status-dot,
+  .animate-shimmer::after {
+    animation: none !important;
+  }
 }

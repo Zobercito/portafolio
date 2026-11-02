@@ -45,13 +45,41 @@ const socialLinks: SocialLink[] = [
   },
 ];
 
-// @ts-ignore
-import { env } from "cloudflare:workers";
-const cfEnv = env as any;
-const turnstileSitekey = cfEnv?.PUBLIC_TURNSTILE_SITE_KEY || import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+// The landing is static; the runtime Turnstile sitekey is resolved by
+// /api/config when this build-time value is empty.
+export const prerender = true;
+
+const turnstileSitekey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: owner.name,
+  jobTitle: "Fullstack Developer",
+  email: "mailto:francisco@zobercito.dev",
+  url: "https://zobercito.dev",
+  address: { "@type": "PostalAddress", addressCountry: "PA" },
+  sameAs: [
+    "https://github.com/Zobercito",
+    "https://www.linkedin.com/in/frank0027/",
+  ],
+  knowsAbout: [
+    "Astro",
+    "React",
+    "TypeScript",
+    "Node.js",
+    "Python",
+    "Cloudflare Workers",
+    "PostgreSQL",
+  ],
+};
 ---
 
-<BaseLayout title={owner.name} description={`${owner.name} — ${owner.role}`}>
+<BaseLayout
+  title={`${owner.name} — Fullstack Developer`}
+  description={`${owner.name}: desarrollador Fullstack en Panamá. Construyo APIs limpias, bases de datos bien diseñadas y experiencias web rápidas.`}
+  jsonLd={personJsonLd}
+>
   <Navbar />
 
   <div

@@ -4,9 +4,19 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description: string;
+  jsonLd?: Record<string, unknown>;
+  image?: string;
 }
 
-const { title, description } = Astro.props;
+const {
+  title,
+  description,
+  jsonLd,
+  image = "/og-image.jpg",
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const ogImage = new URL(image, Astro.site ?? Astro.url).toString();
 ---
 
 <html lang="es">
@@ -16,28 +26,45 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#09090b" />
     <title>{title}</title>
 
-    <!-- Inter font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Francisco González" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Francisco González — Fullstack Developer" />
+    <meta property="og:locale" content="es_PA" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    {jsonLd && (
+      <script
+        is:inline
+        type="application/ld+json"
+        set:html={JSON.stringify(jsonLd)}
+      />
+    )}
+
+    <!-- Self-hosted Inter variable font -->
     <link
       rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      href="/fonts/inter-latin-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-        rel="stylesheet"
-      />
-    </noscript>
 
     <style is:global>
       /* Bezier-sampled arc with 360deg clockwise rotation */
@@ -85,14 +112,10 @@ const { title, description } = Astro.props;
       }
     </style>
 
-    <!-- Cloudflare Turnstile script -->
-    <script is:inline>
-      // Global callback for Turnstile, will be populated by initContactForm
-      window.onloadTurnstileCallback = window.onloadTurnstileCallback || function() {};
-    </script>
+    <!-- Cloudflare Turnstile script (render is explicit, see contactForm.ts) -->
     <script
       is:inline
-      src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback"
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
       defer></script>
   </head>
 
@@ -100,6 +123,7 @@ const { title, description } = Astro.props;
     <!-- ─── SPACE CANVAS ─────────────────────────────────────────── -->
     <canvas
       data-canvas
+      aria-hidden="true"
       style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"
     ></canvas>
 
