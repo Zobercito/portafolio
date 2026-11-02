@@ -3,6 +3,10 @@
 
 const STAR_COUNT = 100;
 const SPEED = 0.1;
+// ~30 fps: las estrellas se desplazan 0,1 px por cuadro, así que a medias
+// cuadros por segundo el movimiento es igual de perceptible y cuesta la mitad.
+const FRAME_MS = 33;
+const SPAWN_CHANCE = 0.02;
 
 class Star {
   x!: number;
@@ -35,20 +39,20 @@ class Star {
     }
     this.size = Math.random() * 2 + 0.2;
     this.speed = this.size * SPEED;
-    this.opacity = Math.random() * 0.5 + 0.3;
+    // Cuantizada a décimas para agrupar los rellenos en pocos cambios de estado.
+    this.opacity = Math.round((Math.random() * 0.5 + 0.3) * 10) / 10;
   }
 
-  update() {
-    this.x += this.speed;
-    this.y -= this.speed;
+  update(step: number) {
+    this.x += this.speed * step;
+    this.y -= this.speed * step;
     if (this.x > this.width || this.y < -10) this.init(false);
   }
 
+  // Cuadrado en vez de arco: a 1-2 px la forma no se distingue y `arc` con
+  // `beginPath` era lo más caro del bucle. El factor mantiene el área pintada.
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = `rgba(255,255,255,${this.opacity})`;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillRect(this.x, this.y, this.size * 1.77, this.size * 1.77);
   }
 }
 
@@ -90,10 +94,10 @@ class ShootingStar {
     this.dead = false;
   }
 
-  update() {
-    this.x += this.dx;
-    this.y += this.dy;
-    this.life++;
+  update(step: number) {
+    this.x += this.dx * step;
+    this.y += this.dy * step;
+    this.life += step;
     this.opacity = (1 - this.life / this.maxLife) * this.baseOpacity;
     if (this.life >= this.maxLife || this.x < -300 || this.y > this.height + 300)
       this.dead = true;
@@ -136,12 +140,16 @@ export function initSpaceCanvas() {
   let width = 0;
   let height = 0;
   let stars: Star[] = [];
+  let batches: { fill: string; stars: Star[] }[] = [];
   let shootingStars: ShootingStar[] = [];
   let frameId: number | null = null;
+  let lastFrame = 0;
   let running = false;
 
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // 1,5 en vez de 2: el fondo no tiene detalle fino y el `clearRect` de cada
+    // cuadro cuesta el doble por cada píxel del lienzo.
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     width = window.innerWidth;
     height = window.innerHeight;
     canvas!.width = Math.round(width * dpr);
@@ -151,29 +159,52 @@ export function initSpaceCanvas() {
     for (let i = 0; i < STAR_COUNT; i++) {
       stars.push(new Star(true, width, height));
     }
-    if (motionQuery.matches) drawStatic();
+    const porOpacidad = new Map<number, Star[]>();
+    for (const star of stars) {
+      const grupo = porOpacidad.get(star.opacity);
+      if (grupo) grupo.push(star);
+      else porOpacidad.set(star.opacity, [star]);
+    }
+    batches = Array.from(porOpacidad, ([opacidad, grupo]) => ({
+      fill: `rgba(255,255,255,${opacidad})`,
+      stars: grupo,
+    }));
+    drawStatic();
+  }
+
+  function drawStars() {
+    for (const batch of batches) {
+      ctx!.fillStyle = batch.fill;
+      for (const star of batch.stars) star.draw(ctx!);
+    }
   }
 
   function drawStatic() {
     ctx!.clearRect(0, 0, width, height);
-    stars.forEach((s) => s.draw(ctx!));
+    drawStars();
   }
 
-  function animate() {
+  function animate(now: number) {
+    frameId = requestAnimationFrame(animate);
+    const elapsed = now - lastFrame;
+    if (elapsed < FRAME_MS) return;
+    lastFrame = now;
+    // 1 = un cuadro de 16,6 ms. Se acota para no teletransportar nada tras un
+    // bloqueo del hilo o un cambio de pestaña.
+    const step = Math.min(elapsed / 16.667, 3);
+
     ctx!.clearRect(0, 0, width, height);
-    stars.forEach((s) => {
-      s.update();
-      s.draw(ctx!);
-    });
-    if (Math.random() < 0.01) {
+    for (const star of stars) star.update(step);
+    drawStars();
+
+    if (Math.random() < SPAWN_CHANCE) {
       shootingStars.push(new ShootingStar(width, height));
     }
     shootingStars = shootingStars.filter((s) => {
-      s.update();
+      s.update(step);
       s.draw(ctx!);
       return !s.dead;
     });
-    frameId = requestAnimationFrame(animate);
   }
 
   function start() {
@@ -203,6 +234,13 @@ export function initSpaceCanvas() {
   });
 
   resize();
-  start();
   window.addEventListener("resize", resize);
+
+  // `resize()` ya pintó el fondo estático; el bucle arranca cuando el hilo
+  // respira, para no pelear con la hidratación de las islas ni con el LCP.
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(() => start(), { timeout: 1_500 });
+  } else {
+    window.setTimeout(start, 200);
+  }
 }
