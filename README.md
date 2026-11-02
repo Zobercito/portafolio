@@ -97,3 +97,14 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
    docker run --rm -v "$PWD":/work -w /work --user "$(id -u):$(id -g)" \
      mcr.microsoft.com/playwright:v1.64.1-noble npx playwright test --update-snapshots
    ```
+
+5. **Smoke post-despliegue:**
+   ```sh
+   npm run smoke                                # contra https://zobercito.dev
+   node scripts/smoke.mjs https://otra-url.dev  # contra otra instancia
+   ```
+   Comprueba la landing prerrenderizada con sus cabeceras de seguridad, los
+   assets inmutables, `/api/config`, que `/api/chat` exija sesión y que
+   `/api/chat/session` y `/api/contact` rechacen un token de Turnstile falso,
+   además de sitemap, robots y el 404. No envía correos ni gasta cuota de Groq.
+   Se lanza a mano y a diario desde `.github/workflows/smoke.yml`.

@@ -1,0 +1,28 @@
+name: Smoke post-deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: URL a comprobar (por defecto producción)
+        required: false
+        default: https://zobercito.dev
+  schedule:
+    # 08:00 en horario peninsular español
+    - cron: '0 6 * * *'
+
+jobs:
+  smoke:
+    name: Comprobaciones contra el despliegue
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Smoke
+        env:
+          SMOKE_BASE_URL: ${{ github.event.inputs.base_url || 'https://zobercito.dev' }}
+        run: node scripts/smoke.mjs "$SMOKE_BASE_URL"
