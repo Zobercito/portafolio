@@ -27,3 +27,29 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  e2e:
+    name: E2E y snapshots (Playwright)
+    runs-on: ubuntu-latest
+    # La imagen oficial trae los navegadores y las fuentes con las que se
+    # generaron los snapshots; en otra imagen el renderizado daría diferencias.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Playwright
+        run: npx playwright test
+
+      - name: Subir informe
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

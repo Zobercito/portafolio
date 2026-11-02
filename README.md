@@ -83,6 +83,17 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
    npm run check
    npm test
    npm run build
+   npm run test:e2e
    ```
 
-   CI runs the same three commands on every push and pull request (`.github/workflows/ci.yml`).
+   CI runs the same commands on every push and pull request (`.github/workflows/ci.yml`).
+
+   `test:e2e` are the Playwright specs in `tests/e2e`: they boot `astro dev` with
+   Cloudflare's always-pass Turnstile sitekey, so no secrets are needed. The visual
+   baselines in `tests/e2e/*-snapshots/` were rendered by the official Playwright
+   image; regenerate them there when the UI really changes:
+
+   ```sh
+   docker run --rm -v "$PWD":/work -w /work --user "$(id -u):$(id -g)" \
+     mcr.microsoft.com/playwright:v1.64.1-noble npx playwright test --update-snapshots
+   ```

@@ -25,6 +25,10 @@ pnpm-debug.log*
 # Cloudflare / Wrangler
 .wrangler/
 
+# Playwright artefacts
+test-results/
+playwright-report/
+
 # Editor and OS files
 .vscode/
 .idea/
