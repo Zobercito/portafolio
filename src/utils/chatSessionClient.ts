@@ -3,6 +3,10 @@ import { loadTurnstileScript } from './turnstileLoader';
 
 const STORAGE_KEY = 'portfolio-chat-session';
 
+// Margen del reto invisible. Por encima de esto se considera que Turnstile no
+// va a responder y conviene dejar que la petición falle de forma visible.
+const TURNSTILE_TOKEN_TIMEOUT_MS = 15_000;
+
 interface ClientConfig {
   sitekey: string | null;
   guardEnabled: boolean;
@@ -71,10 +75,12 @@ async function requestTurnstileToken(sitekey: string): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     let settled = false;
     let widgetId = '';
+    let deadlineId = 0;
 
     const finish = (callback: () => void) => {
       if (settled) return;
       settled = true;
+      window.clearTimeout(deadlineId);
       try {
         if (widgetId) api.remove(widgetId);
       } catch {
@@ -83,6 +89,15 @@ async function requestTurnstileToken(sitekey: string): Promise<string> {
       container.remove();
       callback();
     };
+
+    // El reto invisible puede no devolver nunca un token (navegadores sin
+    // señales reales de usuario). Sin fecha límite el chat se queda
+    // «escribiendo» para siempre; con ella la petición sale sin sesión y el
+    // servidor responde con un error que la interfaz sí muestra.
+    deadlineId = window.setTimeout(
+      () => finish(() => reject(new Error('La verificación de seguridad no respondió'))),
+      TURNSTILE_TOKEN_TIMEOUT_MS,
+    );
 
     try {
       widgetId = api.render(container, {
