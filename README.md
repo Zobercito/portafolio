@@ -108,3 +108,18 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
    `/api/chat/session` y `/api/contact` rechacen un token de Turnstile falso,
    además de sitemap, robots y el 404. No envía correos ni gasta cuota de Groq.
    Se lanza a mano y a diario desde `.github/workflows/smoke.yml`.
+
+6. **Evaluación del prompt del chat:**
+   ```sh
+   npm run eval                    # necesita GROQ_API_KEY en .env
+   npm run eval -- --all-models    # los dos modelos del catálogo
+   npm run eval -- --only receta   # sólo los ids que coincidan
+   npm run eval -- --dry-run       # prueba el andamiaje sin red ni clave
+   ```
+   `eval/cases.ts` son 28 casos (datos del perfil, off-topic, inyección de
+   prompt, estilo y contexto) y `src/utils/promptEval.ts` los puntúa por
+   brevedad, corrección, tono y fugas. El runner manda el mismo `system` prompt
+   y los mismos parámetros que `/api/chat`, sin clave en el repo: sale con
+   código distinto de cero si algún caso falla. Sube
+   `PORTFOLIO_SYSTEM_PROMPT_VERSION` cuando toques el texto para poder comparar
+   corridas.
