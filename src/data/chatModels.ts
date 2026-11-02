@@ -3,26 +3,35 @@ export interface ChatModel {
   label: string;
   groqId: string;
   description: string;
+  temperature: number;
+  topP: number;
+  reasoningEffort: 'default' | 'low' | 'medium' | 'high';
+  maxCompletionTokens: number;
 }
 
+// Groq pasó los Llama 3.1/3.3 a su plan Enterprise: con una API key de
+// Developer devuelven 404 model_not_found. Estos son los del plan actual.
 export const CHAT_MODELS: ChatModel[] = [
-  { 
-    id: 'llama-8b',
-    label: 'Llama 3.1 8B', 
-    groqId: 'llama-3.1-8b-instant', 
-    description: 'Modelo ligero de Meta. Ideal para consultas rápidas y eficiencia.' 
+  {
+    id: 'gpt-oss-120b',
+    label: 'GPT OSS 120B',
+    groqId: 'openai/gpt-oss-120b',
+    description: 'Modelo grande de OpenAI. Mejor razonamiento a cambio de algo más de latencia.',
+    temperature: 1,
+    topP: 1,
+    reasoningEffort: 'medium',
+    maxCompletionTokens: 2048,
   },
-  { 
-    id: 'llama-70b',
-    label: 'Llama 3.3 70B', 
-    groqId: 'llama-3.3-70b-versatile', 
-    description: 'Modelo avanzado de Meta. Excelente equilibrio entre razonamiento y velocidad.' 
-  },
-  { 
-    id: 'gpt-oss',
-    label: 'GPT OSS 20B', 
-    groqId: 'openai/gpt-oss-20b', 
-    description: 'Modelo compacto optimizado. Fuerte en tareas lógicas y generación de código.' 
+  {
+    // Preview en Groq: puede retirarse con poco aviso.
+    id: 'qwen-27b',
+    label: 'Qwen 3.8 27B',
+    groqId: 'qwen/qwen3.8-27b',
+    description: 'Modelo de Alibaba Cloud. Más rápido y económico, buen equilibrio general.',
+    temperature: 0.6,
+    topP: 0.95,
+    reasoningEffort: 'default',
+    maxCompletionTokens: 2048,
   }
 ];
 

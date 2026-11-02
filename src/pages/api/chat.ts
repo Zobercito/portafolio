@@ -100,8 +100,10 @@ export const POST: APIRoute = async ({ request }) => {
       {
         messages: groqMessages,
         model: modelConfig.groqId,
-        temperature: 0.7,
-        max_tokens: 500,
+        temperature: modelConfig.temperature,
+        top_p: modelConfig.topP,
+        reasoning_effort: modelConfig.reasoningEffort,
+        max_completion_tokens: modelConfig.maxCompletionTokens,
         stream: true,
       },
       { signal: upstream.signal },

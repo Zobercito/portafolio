@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getGroqClient } from '../../utils/groqClient';
+import { DEFAULT_MODEL } from '../../data/chatModels';
 import { cleanTitle } from '../../utils/titleCleanup';
 import { TitleValidationError, normalizeTitleRequest } from '../../utils/titleValidation';
 import { getClientIp, jsonError, jsonResponse, readJsonBody } from '../../utils/http';
@@ -70,9 +71,11 @@ export const POST: APIRoute = async ({ request }) => {
           content: `Genera un título para esto:\nUsuario: ${normalized.userMessage}\nAsistente: ${normalized.assistantMessage}`,
         },
       ],
-      model: 'llama-3.1-8b-instant',
+      model: DEFAULT_MODEL.groqId,
       temperature: 0.3,
-      max_tokens: 15,
+      top_p: 1,
+      reasoning_effort: 'low',
+      max_completion_tokens: 256,
     });
 
     const title = cleanTitle(completion.choices[0]?.message?.content);
