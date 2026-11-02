@@ -10,6 +10,8 @@ binding = "ASSETS"
 
 [vars]
 PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAAC_O0RS1ILrCNGVO"
+RESEND_FROM = "contacto@zobercito.dev"
+CONTACT_TO_EMAIL = "francisco@zobercito.dev"
 
 [[kv_namespaces]]
 binding = "SESSION"
