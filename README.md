@@ -13,7 +13,7 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
 
 ## 🛠️ Tech Stack
 
-- **Framework:** Astro 6 (Node.js SSR Adapter)
+- **Framework:** Astro 6 (Cloudflare Workers SSR adapter)
 - **UI Library:** React 19
 - **Styling:** Tailwind CSS 4
 - **AI Integration:** Groq SDK (Llama 3.1, Llama 3.3, and GPT OSS)
@@ -26,6 +26,7 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
 ```text
 /
 ├── public/              # Static assets (Images, Certs, Favicon)
+├── tests/               # Unit tests (node:test)
 ├── src/
 │   ├── components/      # UI Components (Chat, Modals, Sections)
 │   ├── data/            # Static content and AI model configuration
@@ -48,8 +49,8 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js** (v18.14.1+)
-- **npm** or **pnpm**
+- **Node.js** (v22.12 or newer)
+- **npm** (the project pins npm via `packageManager`)
 
 ### Installation
 
@@ -74,3 +75,12 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
    ```sh
    npm run dev
    ```
+
+4. **Verify:**
+   ```sh
+   npm run check
+   npm test
+   npm run build
+   ```
+
+   CI runs the same three commands on every push and pull request (`.github/workflows/ci.yml`).
