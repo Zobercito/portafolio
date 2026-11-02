@@ -2,7 +2,7 @@
 // Handles Turnstile captcha rendering, form submission, and the decorative
 // rocket launch sequence. Feedback is rendered inline (no native alerts).
 
-import type { TurnstileApi } from '../global';
+import { loadTurnstileScript } from '../utils/turnstileLoader';
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -84,15 +84,6 @@ async function playRocketSequence(
   if (flame) flame.style.display = "none";
 }
 
-async function waitForTurnstile(timeoutMs = 10000): Promise<TurnstileApi | null> {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    if (window.turnstile) return window.turnstile;
-    await sleep(100);
-  }
-  return null;
-}
-
 async function resolveSitekey(form: HTMLElement): Promise<string> {
   const fromForm = form.getAttribute("data-turnstile-sitekey")?.trim();
   if (fromForm) return fromForm;
@@ -136,16 +127,16 @@ export function initContactForm() {
     setSubmitEnabled(false, "Completa el captcha para enviar");
   };
 
-  (async () => {
-    const turnstile = await waitForTurnstile();
-    if (!turnstile) {
-      setStatus('error', "No se pudo cargar la verificación de seguridad. Recarga la página.");
-      return;
-    }
-
+  const renderWidget = async () => {
     const sitekey = await resolveSitekey(contactForm);
     if (!sitekey) {
       setStatus('error', "La verificación de seguridad no está configurada.");
+      return;
+    }
+
+    const turnstile = await loadTurnstileScript();
+    if (!turnstile) {
+      setStatus('error', "No se pudo cargar la verificación de seguridad. Recarga la página.");
       return;
     }
 
@@ -165,7 +156,33 @@ export function initContactForm() {
         setStatus('error', "La verificación expiró. Complétala de nuevo.");
       },
     });
-  })();
+  };
+
+  let widgetRequested = false;
+  const requestWidget = () => {
+    if (widgetRequested) return;
+    widgetRequested = true;
+    void renderWidget();
+  };
+
+  // El formulario sólo se renderiza desde el breakpoint xl (en móvil es una
+  // tarjeta con un mailto), así que el observador mira el propio formulario:
+  // dentro de un display:none nunca intersecta y el runtime no se descarga.
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        requestWidget();
+      },
+      { rootMargin: "300px 0px" },
+    );
+    observer.observe(contactForm);
+    // Por si alguien llega al formulario por teclado antes de que sea visible.
+    contactForm.addEventListener("focusin", requestWidget, { once: true });
+  } else {
+    requestWidget();
+  }
 
   contactForm.addEventListener("submit", async (event) => {
     event.preventDefault();

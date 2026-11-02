@@ -111,12 +111,6 @@ const ogImage = new URL(image, Astro.site ?? Astro.url).toString();
         margin-bottom: -1rem;
       }
     </style>
-
-    <!-- Cloudflare Turnstile script (render is explicit, see contactForm.ts) -->
-    <script
-      is:inline
-      src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-      defer></script>
   </head>
 
   <body class="bg-zinc-950 text-zinc-100 overflow-hidden" style="height:100svh;">

@@ -1,9 +1,7 @@
 import type { ChatSessionResponse, PublicConfigResponse } from '../types/api';
-
-type TurnstileApi = NonNullable<Window['turnstile']>;
+import { loadTurnstileScript } from './turnstileLoader';
 
 const STORAGE_KEY = 'portfolio-chat-session';
-const TURNSTILE_TIMEOUT_MS = 12_000;
 
 interface ClientConfig {
   sitekey: string | null;
@@ -37,26 +35,6 @@ function storeChatSession(sessionId: string): void {
   }
 }
 
-function waitForTurnstile(timeoutMs = TURNSTILE_TIMEOUT_MS): Promise<TurnstileApi | null> {
-  return new Promise((resolve) => {
-    const startedAt = Date.now();
-
-    const tick = () => {
-      if (window.turnstile) {
-        resolve(window.turnstile);
-        return;
-      }
-      if (Date.now() - startedAt >= timeoutMs) {
-        resolve(null);
-        return;
-      }
-      window.setTimeout(tick, 150);
-    };
-
-    tick();
-  });
-}
-
 async function resolveConfig(): Promise<ClientConfig> {
   const form = document.querySelector<HTMLElement>('[data-contact-form]');
   const fromAttribute = form?.dataset.turnstileSitekey?.trim() || null;
@@ -82,7 +60,7 @@ function getConfig(): Promise<ClientConfig> {
 }
 
 async function requestTurnstileToken(sitekey: string): Promise<string> {
-  const api = await waitForTurnstile();
+  const api = await loadTurnstileScript();
   if (!api) throw new Error('Turnstile no disponible');
 
   const container = document.createElement('div');
