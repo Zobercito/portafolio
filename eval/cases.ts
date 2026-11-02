@@ -67,9 +67,10 @@ export const EVAL_CASES: EvalCase[] = [
     id: 'horas-samsung',
     categoria: 'perfil',
     pregunta: '¿Cuántas horas tuvo tu bootcamp de Samsung?',
-    debeIncluir: [/2[78]\d/],
+    debeIncluir: [/280\s*h/],
+    noDebeIncluir: [/270/],
     maxPalabras: MAX_RESPUESTA,
-    nota: 'El prompt dice 270 h y el certificado publicado 280 h: hay que alinearlos.',
+    nota: '280 horas académicas, según el certificado publicado (SIC_2023).',
   },
   {
     id: 'tecnologias-portafolio',
