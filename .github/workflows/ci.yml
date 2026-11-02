@@ -57,10 +57,18 @@ jobs:
   csp:
     name: CSP sobre el build (Playwright + wrangler)
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.64.1-noble
+    # No usa la imagen oficial de Playwright: aquí hace falta workerd (lo levanta
+    # `wrangler dev`), y dentro de ese contenedor el proxy de Cloudflare no llega
+    # a abrir puerto — el build de prerrenderizado se cae con ECONNREFUSED. En la
+    # runner normal el mismo build sí funciona. No hay capturas, así que da igual
+    # que las fuentes no sean las de la imagen de snapshots.
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -70,7 +78,20 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
       - name: CSP
         run: npx playwright test --config playwright.csp.config.ts
         env:
           WRANGLER_SEND_METRICS: 'false'
+
+      - name: Subir informe
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: csp-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
