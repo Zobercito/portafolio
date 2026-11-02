@@ -1,21 +1,33 @@
 // Global type declarations for third-party scripts and cross-component globals.
 // This file is automatically picked up by TypeScript via tsconfig.json.
 
+interface TurnstileRenderOptions {
+  sitekey: string;
+  theme?: 'light' | 'dark' | 'auto';
+  size?: 'normal' | 'compact' | 'flexible' | 'invisible';
+  execution?: 'render' | 'execute';
+  appearance?: 'always' | 'execute' | 'interaction-only';
+  callback?: (token: string) => void;
+  'error-callback'?: (code?: string) => void;
+  'expired-callback'?: () => void;
+  'timeout-callback'?: () => void;
+}
+
+interface TurnstileApi {
+  render: (el: string | HTMLElement, options: TurnstileRenderOptions) => string;
+  reset: (id?: string) => void;
+  getResponse: (id?: string) => string;
+  execute: (id?: string) => void;
+  ready: (callback: () => void) => void;
+  remove: (id?: string) => void;
+}
+
 declare global {
   interface Window {
-    /** Exposed by slideEngine.ts — used by NameTypewriter and other React components */
-    goToSlide: (index: number) => void;
-
-    /** Exposed by contactForm.ts — called by the Cloudflare Turnstile script via ?onload= */
-    onloadTurnstileCallback: () => void;
-
-    /** Injected by the Cloudflare Turnstile external script */
-    turnstile: {
-      render: (el: string | HTMLElement, options: any) => string;
-      reset: (id?: string) => void;
-      getResponse: (id?: string) => string;
-    };
+    /** Injected by the Cloudflare Turnstile external script (optional until loaded). */
+    turnstile?: TurnstileApi;
   }
 }
 
+export type { TurnstileApi, TurnstileRenderOptions };
 export {};

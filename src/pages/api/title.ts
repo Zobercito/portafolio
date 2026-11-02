@@ -1,16 +1,20 @@
 import type { APIRoute } from 'astro';
 import { getGroqClient } from '../../utils/groqClient';
+import { cleanTitle } from '../../utils/titleCleanup';
+import { TitleValidationError, normalizeTitleRequest } from '../../utils/titleValidation';
+import { getClientIp, jsonError, jsonResponse, readJsonBody } from '../../utils/http';
+import { checkRateLimit } from '../../utils/rateLimit';
+import {
+  getChatSessionStore,
+  getRateLimitStore,
+  isChatGuardEnabled,
+  readEnvValue,
+} from '../../utils/env';
+import { isChatSessionValid } from '../../utils/chatSession';
+import { MAX_TITLE_BODY_BYTES, TITLE_RATE_LIMIT } from '../../utils/limits';
+import type { TitleResponse } from '../../types/api';
 
 export const prerender = false;
-
-interface TitleRequest {
-  userMessage: string;
-  assistantMessage?: string;
-}
-
-interface TitleResponse {
-  title: string;
-}
 
 const TITLE_SYSTEM_PROMPT = `Eres un experto redactor. Tu única tarea es leer la interacción entre el usuario y el asistente y generar un título corto y descriptivo para la conversación.
 Reglas estrictas:
@@ -21,41 +25,62 @@ Reglas estrictas:
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const groq = getGroqClient();
-    const body: TitleRequest = await request.json();
-    const { userMessage, assistantMessage } = body;
-
-    if (!userMessage) {
-      return new Response(JSON.stringify({ error: 'userMessage is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    const ip = getClientIp(request);
+    const rate = await checkRateLimit(
+      getRateLimitStore(),
+      `title:${ip}`,
+      TITLE_RATE_LIMIT,
+    );
+    if (!rate.allowed) {
+      return jsonError(
+        'Demasiadas solicitudes. Intenta de nuevo en unos segundos.',
+        429,
+        { 'Retry-After': String(rate.retryAfterSeconds) },
+        'RATE_LIMITED',
+      );
     }
 
+    if (isChatGuardEnabled()) {
+      const sessionId = request.headers.get('x-chat-session');
+      const validSession = await isChatSessionValid(getChatSessionStore(), sessionId);
+      if (!validSession) {
+        return jsonError('Verificación de seguridad requerida', 401, {}, 'CHAT_SESSION_REQUIRED');
+      }
+    }
+
+    const body = await readJsonBody(request, MAX_TITLE_BODY_BYTES);
+    if (!body.ok) return jsonError(body.error, body.status, {}, body.code);
+
+    let normalized: ReturnType<typeof normalizeTitleRequest>;
+    try {
+      normalized = normalizeTitleRequest(body.data);
+    } catch (error) {
+      if (error instanceof TitleValidationError) {
+        return jsonError(error.message, 400, {}, 'INVALID_TITLE_REQUEST');
+      }
+      throw error;
+    }
+
+    const groq = getGroqClient(readEnvValue('GROQ_API_KEY'));
     const completion = await groq.chat.completions.create({
       messages: [
         { role: 'system', content: TITLE_SYSTEM_PROMPT },
-        { role: 'user', content: `Genera un título para esto:\nUsuario: ${userMessage}\nAsistente: ${assistantMessage || ''}` }
+        {
+          role: 'user',
+          content: `Genera un título para esto:\nUsuario: ${normalized.userMessage}\nAsistente: ${normalized.assistantMessage}`,
+        },
       ],
       model: 'llama-3.1-8b-instant',
       temperature: 0.3,
       max_tokens: 15,
     });
 
-    const title = completion.choices[0]?.message?.content?.trim().replace(/^["']|["']$/g, '') || 'Nueva conversación';
-
+    const title = cleanTitle(completion.choices[0]?.message?.content);
     const responseBody: TitleResponse = { title };
-    return new Response(JSON.stringify(responseBody), {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
 
-  } catch (error: any) {
+    return jsonResponse(responseBody);
+  } catch (error) {
     console.error('Title Generation Error:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Internal Server Error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonError('No se pudo generar el título', 500);
   }
 };
