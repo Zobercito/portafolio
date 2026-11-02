@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { lazy, Suspense, useState } from 'react';
 import type { Message } from '../../types/chat';
 import { ChatIcons } from './ChatIcons';
-import { markdownComponents, markdownPlugins } from './ChatMarkdown';
+
+const ChatMarkdownBody = lazy(() => import('./ChatMarkdownBody'));
 
 interface ChatMessageProps {
   message: Message;
@@ -105,9 +105,9 @@ export function ChatMessage({ message, isLast, onRegenerate, onRetry }: ChatMess
         >
           {isAssistant ? (
             <div className="w-full break-words min-w-0 prose-sm prose-invert max-w-full overflow-hidden">
-              <ReactMarkdown remarkPlugins={markdownPlugins} components={markdownComponents}>
-                {message.content}
-              </ReactMarkdown>
+              <Suspense fallback={<span className="whitespace-pre-wrap">{message.content}</span>}>
+                <ChatMarkdownBody content={message.content} />
+              </Suspense>
               {message.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-zinc-400 animate-pulse align-middle"></span>}
             </div>
           ) : (
