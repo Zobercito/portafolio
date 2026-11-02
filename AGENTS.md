@@ -13,6 +13,7 @@
 | dev | `npm run dev` |
 | build | `npm run build` |
 | test | `npm test` |
+| test:csp | `npm run test:csp` |
 | test:e2e | `npm run test:e2e` |
 
 ## Definición de terminado
