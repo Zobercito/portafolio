@@ -28,6 +28,18 @@ export function buildContentSecurityPolicy(scriptHashes: readonly string[] = [])
     'https://challenges.cloudflare.com',
   ].join(' ');
 
+  const imgSrc = [
+    "'self'",
+    'data:',
+    'blob:',
+    'https://cdn.jsdelivr.net',
+    // El avatar se pide como github.com/<usuario>.png y responde 302 a
+    // avatars.githubusercontent.com; CSP comprueba también el destino de la
+    // redirección, así que hacen falta los dos orígenes.
+    'https://github.com',
+    'https://avatars.githubusercontent.com',
+  ].join(' ');
+
   return [
     "default-src 'self'",
     "base-uri 'self'",
@@ -37,7 +49,7 @@ export function buildContentSecurityPolicy(scriptHashes: readonly string[] = [])
     `script-src ${scriptSrc}`,
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' data:",
-    "img-src 'self' data: blob: https://cdn.jsdelivr.net https://github.com",
+    `img-src ${imgSrc}`,
     "media-src 'self'",
     "connect-src 'self' https://challenges.cloudflare.com",
     "frame-src https://challenges.cloudflare.com",

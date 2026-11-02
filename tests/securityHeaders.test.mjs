@@ -54,7 +54,10 @@ test('la CSP permite Turnstile y ya no abre el formulario a Web3Forms', () => {
 });
 
 test('la CSP deja cargar el avatar de GitHub de la tarjeta de actividad', () => {
+  // github.com/<usuario>.png responde 302 a avatars.githubusercontent.com y CSP
+  // evalúa también el destino de la redirección.
   assert.match(CONTENT_SECURITY_POLICY, /img-src[^;]*github\.com/);
+  assert.match(CONTENT_SECURITY_POLICY, /img-src[^;]*avatars\.githubusercontent\.com/);
 });
 
 test('la CSP ya no depende de Google Fonts', () => {
