@@ -8,15 +8,24 @@ interface ChatMessageProps {
   message: Message;
   isLast: boolean;
   onRegenerate?: () => void;
+  onRetry?: () => void;
 }
 
 interface MessageUtilitiesProps {
   content: string;
   isLast: boolean;
+  isError?: boolean;
   onRegenerate?: () => void;
+  onRetry?: () => void;
 }
 
-const MessageUtilities = ({ content, isLast, onRegenerate }: MessageUtilitiesProps) => {
+const MessageUtilities = ({
+  content,
+  isLast,
+  isError,
+  onRegenerate,
+  onRetry,
+}: MessageUtilitiesProps) => {
   const [copied, setCopied] = useState(false);
   const [thumb, setThumb] = useState<'up' | 'down' | null>(null);
 
@@ -48,7 +57,18 @@ const MessageUtilities = ({ content, isLast, onRegenerate }: MessageUtilitiesPro
 
       <div className="h-4 w-px bg-zinc-700/50 mx-1"></div>
 
-      {isLast && onRegenerate && (
+      {isLast && isError && onRetry && (
+        <button
+          onClick={onRetry}
+          className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-red-300 hover:text-red-200 hover:bg-red-500/10 rounded-md transition-all"
+          aria-label="Reintentar respuesta"
+        >
+          <ChatIcons.Refresh className="w-3.5 h-3.5" />
+          Reintentar
+        </button>
+      )}
+
+      {isLast && !isError && onRegenerate && (
         <button onClick={onRegenerate} className="p-1.5 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700/30 rounded-md transition-all" aria-label="Regenerar respuesta">
           <ChatIcons.Refresh />
         </button>
@@ -62,8 +82,9 @@ const MessageUtilities = ({ content, isLast, onRegenerate }: MessageUtilitiesPro
   );
 };
 
-export function ChatMessage({ message, isLast, onRegenerate }: ChatMessageProps) {
+export function ChatMessage({ message, isLast, onRegenerate, onRetry }: ChatMessageProps) {
   const isAssistant = message.role === 'assistant';
+  const isError = Boolean(message.isError);
 
   return (
     <div className={`flex w-full gap-3 ${isAssistant ? 'justify-start' : 'justify-end'}`}>
@@ -76,7 +97,9 @@ export function ChatMessage({ message, isLast, onRegenerate }: ChatMessageProps)
       <div className={`max-w-[90%] md:max-w-[85%] flex flex-col min-w-0 ${isAssistant ? 'items-start' : 'items-end'}`}>
         <div
           className={`rounded-2xl px-3.5 py-2.5 leading-relaxed inline-block max-w-full min-w-0 text-[13px] md:text-sm ${isAssistant
-            ? 'bg-zinc-800/60 text-zinc-200 border border-zinc-700/50 rounded-bl-sm font-sans'
+            ? isError
+              ? 'bg-red-950/40 text-red-200 border border-red-900/60 rounded-bl-sm font-sans'
+              : 'bg-zinc-800/60 text-zinc-200 border border-zinc-700/50 rounded-bl-sm font-sans'
             : 'bg-zinc-100 text-zinc-900 rounded-br-sm shadow-md'
           }`}
         >
@@ -93,7 +116,13 @@ export function ChatMessage({ message, isLast, onRegenerate }: ChatMessageProps)
         </div>
 
         {isAssistant && !message.isStreaming && (
-          <MessageUtilities content={message.content} isLast={isLast} onRegenerate={onRegenerate} />
+          <MessageUtilities
+            content={message.content}
+            isLast={isLast}
+            isError={isError}
+            onRegenerate={onRegenerate}
+            onRetry={onRetry}
+          />
         )}
       </div>
 

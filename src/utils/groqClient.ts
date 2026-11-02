@@ -5,6 +5,10 @@ import Groq from 'groq-sdk';
  * If no GROQ_API_KEY is configured and the app runs in development,
  * returns a lightweight mock client so the UI can function without
  * real API keys. Never use the mock in production.
+ *
+ * Workers note: `groq-sdk` pulls Node builtins (tty/util/path) that do not
+ * exist in the edge runtime. `astro.config.mjs` aliases them to `src/empty.js`
+ * and `nodejs_compat` is enabled; keep both if the SDK is upgraded.
  */
 export function getGroqClient(apiKeyOverride?: string): Groq {
   const apiKey = apiKeyOverride || import.meta.env.GROQ_API_KEY;
@@ -27,10 +31,26 @@ export function getGroqClient(apiKeyOverride?: string): Groq {
   const mockClient: any = {
     chat: {
       completions: {
-        create: async function* (_opts: any) {
-          const simulated = 'Respuesta de desarrollo (mock) — habilita GROQ_API_KEY para producción.';
-          // Yield a single chunk structured like the real SDK stream
-          yield { choices: [{ delta: { content: simulated } }] };
+        // Mirrors the two shapes the API routes consume: an async iterable
+        // when `stream: true` and a plain completion otherwise.
+        create: (opts: { stream?: boolean }, _options?: { signal?: AbortSignal }) => {
+          if (opts?.stream) {
+            return (async function* () {
+              const parts = [
+                'Respuesta de desarrollo ',
+                '(mock) — habilita ',
+                'GROQ_API_KEY para producción.',
+              ];
+              for (const part of parts) {
+                await new Promise((resolve) => setTimeout(resolve, 80));
+                yield { choices: [{ delta: { content: part } }] };
+              }
+            })();
+          }
+
+          return Promise.resolve({
+            choices: [{ message: { content: 'Conversación de desarrollo' } }],
+          });
         }
       }
     }

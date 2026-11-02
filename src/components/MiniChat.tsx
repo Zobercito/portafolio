@@ -7,7 +7,6 @@ import { ChatSidebar } from './chat/ChatSidebar';
 import { ChatHeader } from './chat/ChatHeader';
 import { ChatMessageList } from './chat/ChatMessageList';
 import { ChatInput } from './chat/ChatInput';
-import type { Message } from '../types/chat';
 
 export default function MiniChat() {
   const {
@@ -15,6 +14,7 @@ export default function MiniChat() {
     inputValue,
     setInputValue,
     isTyping,
+    isBusy,
     currentChatId,
     history,
     selectedModel,
@@ -28,6 +28,7 @@ export default function MiniChat() {
     deleteHistoryItem,
     renameHistoryItem,
     handleRegenerate,
+    handleRetry,
   } = useChatEngine();
 
   const { scrollRef } = useChatScroll([messages, isTyping]);
@@ -37,7 +38,7 @@ export default function MiniChat() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const isFirstRender = useRef(true);
-  const isDisabled = isTyping || messages.some((m: Message) => m.isStreaming);
+  const isDisabled = isBusy;
 
   // Focus back to input when it becomes enabled, but not on initial load
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function MiniChat() {
   };
 
   const handleSuggestion = (content: string) => {
+    if (isDisabled) return;
     processMessage(content);
     setTimeout(() => {
       inputRef.current?.focus();
@@ -106,6 +108,7 @@ export default function MiniChat() {
           isGeneratingTitle={isGeneratingTitle}
           selectedModel={selectedModel}
           isModelMenuOpen={isModelMenuOpen}
+          isBusy={isBusy}
           onModelSelect={(id) => { setSelectedModel(id); setIsModelMenuOpen(false); }}
           onModelMenuToggle={() => setIsModelMenuOpen(!isModelMenuOpen)}
         />
@@ -115,6 +118,7 @@ export default function MiniChat() {
           isTyping={isTyping}
           scrollRef={scrollRef}
           onRegenerate={handleRegenerate}
+          onRetry={handleRetry}
         />
 
         <ChatInput

@@ -6,6 +6,7 @@ interface ChatMessageListProps {
   isTyping: boolean;
   scrollRef: React.RefObject<HTMLDivElement | null>;
   onRegenerate: () => void;
+  onRetry: () => void;
 }
 
 export function ChatMessageList({
@@ -13,9 +14,17 @@ export function ChatMessageList({
   isTyping,
   scrollRef,
   onRegenerate,
+  onRetry,
 }: ChatMessageListProps) {
   return (
-    <div className="flex-1 overflow-y-auto px-4 pt-4 pb-1 space-y-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-700/50 [&::-webkit-scrollbar-thumb]:rounded-full [scrollbar-width:thin] [scrollbar-color:#3f3f46_transparent]">
+    <div
+      role="log"
+      aria-live="polite"
+      aria-relevant="additions text"
+      aria-busy={isTyping}
+      aria-label="Conversación"
+      className="flex-1 overflow-y-auto px-4 pt-4 pb-1 space-y-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-700/50 [&::-webkit-scrollbar-thumb]:rounded-full [scrollbar-width:thin] [scrollbar-color:#3f3f46_transparent]"
+    >
       {messages.length === 0 ? (
         <div className="h-full flex flex-col items-center justify-center text-center px-4 animate-fade-in">
           <h3 className="text-xl md:text-2xl font-medium text-zinc-100 mb-2 tracking-tight">
@@ -33,6 +42,7 @@ export function ChatMessageList({
               message={msg}
               isLast={idx === messages.length - 1}
               onRegenerate={onRegenerate}
+              onRetry={onRetry}
             />
           ))}
 
@@ -43,7 +53,8 @@ export function ChatMessageList({
                 AI
               </div>
               <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-2xl rounded-bl-sm px-4 py-4 w-fit">
-                <div className="flex space-x-1.5 items-center h-2">
+                <span className="sr-only">El asistente está escribiendo</span>
+                <div className="flex space-x-1.5 items-center h-2" aria-hidden="true">
                   <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                   <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
                   <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"></div>

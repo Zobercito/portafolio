@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { ChatIcons } from './ChatIcons';
+import { MAX_MESSAGE_LENGTH } from '../../utils/chatValidation';
 
 interface Suggestion {
   label: string;
@@ -65,6 +66,8 @@ export const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({
             onBlur={onBlur}
             placeholder="Pregúntame algo..."
             disabled={isDisabled}
+            maxLength={MAX_MESSAGE_LENGTH}
+            aria-label="Mensaje para el asistente"
             className="w-full bg-zinc-950 border border-zinc-800 rounded-full pl-4 pr-12 py-2.5 text-zinc-100 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-300 transition-colors disabled:opacity-50"
           />
           <button

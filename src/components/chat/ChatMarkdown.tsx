@@ -83,7 +83,7 @@ export const markdownComponents: any = {
   ul: ({ children }: any) => <ul className="list-disc pl-5 mb-2 space-y-1 text-sm">{children}</ul>,
   ol: ({ children }: any) => <ol className="list-decimal pl-5 mb-2 space-y-1 text-sm">{children}</ol>,
   li: ({ children }: any) => <li className="break-words">{children}</li>,
-  a: ({ children, href }: any) => <a href={href} className="text-blue-400 hover:text-blue-300 underline underline-offset-2 break-all">{children}</a>,
+  a: ({ children, href }: any) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline underline-offset-2 break-all">{children}</a>,
 };
 
 export const markdownPlugins = [remarkGfm];

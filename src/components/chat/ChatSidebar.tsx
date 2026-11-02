@@ -35,8 +35,9 @@ export function ChatSidebar({
   };
 
   const handleRenameSubmit = (id: string) => {
-    if (editingTitle.trim()) {
-      onRenameChat(id, editingTitle);
+    const title = editingTitle.trim();
+    if (title) {
+      onRenameChat(id, title);
     }
     setEditingId(null);
   };
@@ -138,7 +139,11 @@ export function ChatSidebar({
                               Renombrar
                             </button>
                             <button
-                              onClick={() => onDeleteChat(chat.id)}
+                              onClick={() => {
+                                const confirmed = window.confirm('¿Borrar esta conversación?');
+                                if (confirmed) onDeleteChat(chat.id);
+                                setActiveMenuId(null);
+                              }}
                               className="flex items-center gap-2 w-full p-2 text-[12px] text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                             >
                               <ChatIcons.Trash className="w-3.5 h-3.5" />
@@ -154,17 +159,22 @@ export function ChatSidebar({
             ))}
           </div>
 
-          <div className="mt-auto pt-4 border-t border-zinc-800/50 text-[11px] text-zinc-500 px-2 flex items-center justify-between">
-            <span>Powered by Groq API 🚀</span>
-            <a
-              href="https://groq.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-zinc-200 transition-colors opacity-60 hover:opacity-100"
-              title="Más información sobre Groq"
-            >
-              <ChatIcons.Info className="w-3.5 h-3.5" />
-            </a>
+          <div className="mt-auto pt-3 border-t border-zinc-800/50 px-2">
+            <p className="text-[10px] leading-snug text-zinc-500">
+              Las conversaciones solo viven en esta pestaña y se borran al recargar.
+            </p>
+            <div className="mt-2 text-[11px] text-zinc-500 flex items-center justify-between">
+              <span>Powered by Groq API 🚀</span>
+              <a
+                href="https://groq.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-zinc-200 transition-colors opacity-60 hover:opacity-100"
+                title="Más información sobre Groq"
+              >
+                <ChatIcons.Info className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
         </div>
       </aside>

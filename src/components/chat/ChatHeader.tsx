@@ -9,6 +9,7 @@ interface ChatHeaderProps {
   isGeneratingTitle: boolean;
   selectedModel: string;
   isModelMenuOpen: boolean;
+  isBusy?: boolean;
   onModelSelect: (modelId: string) => void;
   onModelMenuToggle: () => void;
 }
@@ -19,6 +20,7 @@ export function ChatHeader({
   isGeneratingTitle,
   selectedModel,
   isModelMenuOpen,
+  isBusy = false,
   onModelSelect,
   onModelMenuToggle,
 }: ChatHeaderProps) {
@@ -26,6 +28,9 @@ export function ChatHeader({
     currentChatId
       ? (history.find((h) => h.id === currentChatId)?.title || 'Conversación')
       : null;
+
+  const selectedLabel =
+    CHAT_MODELS.find((m) => m.id === selectedModel)?.label || selectedModel;
 
   return (
     <div className="px-3 py-2 border-b border-zinc-800/50 bg-zinc-900/30 w-full flex items-center justify-between shrink-0 h-13">
@@ -43,9 +48,13 @@ export function ChatHeader({
       <div className="relative">
         <button
           onClick={onModelMenuToggle}
-          className="flex items-center gap-1.5 hover:bg-zinc-800/80 px-2 py-1.5 rounded-lg transition-colors text-zinc-300 text-[11px] sm:text-[13px] font-medium border border-transparent hover:border-zinc-700/50 select-none shrink-0"
+          disabled={isBusy}
+          aria-expanded={isModelMenuOpen}
+          aria-haspopup="menu"
+          aria-label={`Cambiar modelo de IA: ${selectedLabel}`}
+          className="flex items-center gap-1.5 hover:bg-zinc-800/80 px-2 py-1.5 rounded-lg transition-colors text-zinc-300 text-[11px] sm:text-[13px] font-medium border border-transparent hover:border-zinc-700/50 select-none shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {CHAT_MODELS.find((m) => m.id === selectedModel)?.label || selectedModel}
+          {selectedLabel}
           <ChatIcons.ChevronDown
             className={`text-zinc-500 transition-transform duration-200 ${isModelMenuOpen ? 'rotate-180' : ''}`}
           />
@@ -53,12 +62,19 @@ export function ChatHeader({
 
         {isModelMenuOpen && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => onModelSelect(selectedModel)} />
-            <div className="absolute top-full right-0 mt-1.5 w-64 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl p-1.5 z-50 animate-fade-in origin-top-right">
+            <div className="fixed inset-0 z-40" onClick={onModelMenuToggle} />
+            <div
+              role="menu"
+              aria-label="Modelos disponibles"
+              className="absolute top-full right-0 mt-1.5 w-64 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl p-1.5 z-50 animate-fade-in origin-top-right"
+            >
               {CHAT_MODELS.map((model: ChatModel) => (
-                <div
+                <button
                   key={model.id}
-                  className="p-2 hover:bg-zinc-800/80 rounded-lg cursor-pointer transition-colors mt-0.5 first:mt-0"
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={selectedModel === model.id}
+                  className="w-full text-left p-2 hover:bg-zinc-800/80 rounded-lg cursor-pointer transition-colors mt-0.5 first:mt-0"
                   onClick={() => onModelSelect(model.id)}
                 >
                   <div className="text-sm text-zinc-200 flex items-center justify-between font-medium">
@@ -68,7 +84,7 @@ export function ChatHeader({
                     )}
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-0.5">{model.description}</div>
-                </div>
+                </button>
               ))}
             </div>
           </>

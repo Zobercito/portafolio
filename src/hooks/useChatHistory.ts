@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Message, ChatHistoryEntry } from '../types/chat';
+import { createId } from '../utils/id';
 
 export function useChatHistory() {
   const [history, setHistory] = useState<ChatHistoryEntry[]>([]);
@@ -8,7 +9,7 @@ export function useChatHistory() {
 
   // Creates a new history entry and returns the new chatId
   const createChat = (): string => {
-    const chatId = Date.now().toString();
+    const chatId = createId();
     setHistory((prev) => [{ id: chatId, title: 'Nueva conversación...' }, ...prev]);
     setCurrentChatId(chatId);
     return chatId;
@@ -26,10 +27,13 @@ export function useChatHistory() {
     );
   };
 
-  // Returns the stored messages for the given chat and sets it as current
+  // Returns the stored messages for the given chat and sets it as current.
+  // Any stream that was interrupted is normalized so the UI never blocks.
   const switchChat = (chatId: string): Message[] => {
     setCurrentChatId(chatId);
-    return chatMessagesMap[chatId] || [];
+    return (chatMessagesMap[chatId] || []).map((message) =>
+      message.isStreaming ? { ...message, isStreaming: false } : message,
+    );
   };
 
   const deleteHistoryItem = (id: string) => {
