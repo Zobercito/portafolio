@@ -75,6 +75,13 @@ const checks = [
       const enforcing = res.headers.get('content-security-policy');
       if (enforcing) {
         assert(!/script-src[^;]*unsafe-inline/.test(enforcing), 'script-src sigue con unsafe-inline');
+        // El beacon de Web Analytics lo inyecta el edge de Cloudflare al servir,
+        // así que sólo se puede comprobar sobre la respuesta real: sin este
+        // origen las visitas dejan de contarse y en la página no se ve nada.
+        assert(
+          /script-src[^;]*static\.cloudflareinsights\.com/.test(enforcing),
+          'la CSP bloquea el beacon de Web Analytics',
+        );
         const scriptHashes = await Promise.all(
           extractInlineScripts(res.text).map((script) => cspHash(script.code)),
         );

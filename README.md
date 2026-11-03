@@ -113,7 +113,10 @@ This is my professional portfolio, designed to be fast, minimalist, and highly f
    `test:csp` boots the real artifact (`wrangler dev -c wrangler.deploy.toml`) and
    fails if the browser reports a single `securitypolicyviolation` while hydrating
    the landing, loading Turnstile or rendering the 404. It's the check that catches
-   a new third-party origin or an inline script that nobody authorized.
+   a new third-party origin or an inline script that nobody authorized. One
+   exception: Cloudflare's Web Analytics beacon is injected by the edge when it
+   serves the page, so it isn't in the HTML and `wrangler dev` never requests it —
+   `npm run smoke` is what checks that origin against the live response.
 
 5. **Smoke post-despliegue:**
    ```sh

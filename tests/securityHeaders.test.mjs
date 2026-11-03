@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import {
   CONTENT_SECURITY_POLICY,
@@ -58,6 +59,31 @@ test('la CSP deja cargar el avatar de GitHub de la tarjeta de actividad', () => 
   // evalúa también el destino de la redirección.
   assert.match(CONTENT_SECURITY_POLICY, /img-src[^;]*github\.com/);
   assert.match(CONTENT_SECURITY_POLICY, /img-src[^;]*avatars\.githubusercontent\.com/);
+});
+
+test('la CSP autoriza el beacon de Web Analytics de Cloudflare', () => {
+  // Lo inyecta el edge al servir, no está en el HTML: si no se autoriza, el
+  // dashboard deja de contar visitas sin ningún error visible en la página.
+  assert.match(CONTENT_SECURITY_POLICY, /script-src[^;]*static\.cloudflareinsights\.com/);
+  assert.match(CONTENT_SECURITY_POLICY, /connect-src[^;]*https:\/\/cloudflareinsights\.com/);
+});
+
+test('public/_headers y el constructor de la CSP no divergen', () => {
+  // El build reescribe la línea de dist con los hashes, pero el fichero del repo
+  // es el punto de partida legible: si alguien añade un origen a uno y no al
+  // otro, la diferencia se pierde al servir la landing.
+  const headers = readFileSync(
+    new URL('../public/_headers', import.meta.url),
+    'utf8',
+  );
+  const linea = headers.match(/^ {2}Content-Security-Policy: (.+)$/m)?.[1];
+  assert.ok(linea, 'public/_headers debe tener la línea de Content-Security-Policy');
+  const sinHashes = (policy) =>
+    policy
+      .split('; ')
+      .map((directiva) => directiva.split(' ').filter((p) => !p.startsWith("'sha256-")).join(' '))
+      .join('; ');
+  assert.equal(sinHashes(linea), sinHashes(CONTENT_SECURITY_POLICY));
 });
 
 test('la CSP ya no depende de Google Fonts', () => {

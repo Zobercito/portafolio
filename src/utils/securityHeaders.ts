@@ -18,6 +18,9 @@
  * prerenderizada y los assets estáticos (aquí el middleware no llega a correr).
  */
 
+const ANALYTICS_SCRIPT_ORIGIN = 'https://static.cloudflareinsights.com';
+const ANALYTICS_BEACON_ORIGIN = 'https://cloudflareinsights.com';
+
 export function buildContentSecurityPolicy(scriptHashes: readonly string[] = []): string {
   // Las expresiones de origen con base64 van entre comillas simples: `+`, `/` y
   // `=` no son caracteres válidos sin entrecomillar y el navegador descartaría
@@ -26,6 +29,11 @@ export function buildContentSecurityPolicy(scriptHashes: readonly string[] = [])
     "'self'",
     ...scriptHashes.map((hash) => `'${hash}'`),
     'https://challenges.cloudflare.com',
+    // El edge de Cloudflare inyecta el beacon de Web Analytics como
+    // <script src> en el HTML ya servido, así que pasa por script-src. Con la
+    // CSP en modo estricto se bloqueaba en silencio y el dashboard dejaba de
+    // contar visitas; en local no se nota porque `wrangler dev` no lo inyecta.
+    ANALYTICS_SCRIPT_ORIGIN,
   ].join(' ');
 
   const imgSrc = [
@@ -51,7 +59,7 @@ export function buildContentSecurityPolicy(scriptHashes: readonly string[] = [])
     "font-src 'self' data:",
     `img-src ${imgSrc}`,
     "media-src 'self'",
-    "connect-src 'self' https://challenges.cloudflare.com",
+    `connect-src 'self' https://challenges.cloudflare.com ${ANALYTICS_BEACON_ORIGIN}`,
     "frame-src https://challenges.cloudflare.com",
     "worker-src 'self' blob:",
     "manifest-src 'self'",
