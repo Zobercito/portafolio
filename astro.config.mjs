@@ -15,20 +15,20 @@ export default defineConfig({
     // @ts-ignore
     platformProxy: {
       enabled: true,
-      configPath: 'wrangler.deploy.toml'
-    }
+      configPath: 'wrangler.deploy.toml',
+    },
   }),
   vite: {
     resolve: {
       conditions: ['workerd', 'worker', 'browser'],
       alias: {
-        'tty': '/src/empty.js',
-        'util': '/src/empty.js',
-        'path': '/src/empty.js',
+        tty: '/src/empty.js',
+        util: '/src/empty.js',
+        path: '/src/empty.js',
         'node:tty': '/src/empty.js',
         'node:util': '/src/empty.js',
-        'node:path': '/src/empty.js'
-      }
+        'node:path': '/src/empty.js',
+      },
     },
     plugins: [tailwindcss()],
     build: {
@@ -36,13 +36,12 @@ export default defineConfig({
       terserOptions: {
         compress: {
           drop_console: false,
-          pure_funcs: ['console.debug']
-        }
+          pure_funcs: ['console.debug'],
+        },
       },
-      brotliSize: false
     },
     optimizeDeps: {
-      include: ['react-dom/client', 'react-dom']
+      include: ['react-dom/client', 'react-dom'],
     },
     ssr: {
       optimizeDeps: {
@@ -52,10 +51,10 @@ export default defineConfig({
           'react-dom/server',
           'react/jsx-runtime',
           'react/jsx-dev-runtime',
-          '@astrojs/react/server.js'
-        ]
-      }
-    }
+          '@astrojs/react/server.js',
+        ],
+      },
+    },
   },
-  integrations: [react()]
+  integrations: [react()],
 });

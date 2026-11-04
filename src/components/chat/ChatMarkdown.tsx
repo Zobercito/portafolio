@@ -1,26 +1,28 @@
 import { useState } from 'react';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+// Solo lenguajes usados en el chat
 import js from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
 import ts from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
 import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
-import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
-import markup from 'react-syntax-highlighter/dist/esm/languages/prism/markup';
-import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
 import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 SyntaxHighlighter.registerLanguage('javascript', js);
 SyntaxHighlighter.registerLanguage('typescript', ts);
 SyntaxHighlighter.registerLanguage('python', python);
-SyntaxHighlighter.registerLanguage('css', css);
-SyntaxHighlighter.registerLanguage('html', markup);
-SyntaxHighlighter.registerLanguage('markup', markup);
-SyntaxHighlighter.registerLanguage('json', json);
 SyntaxHighlighter.registerLanguage('bash', bash);
 import remarkGfm from 'remark-gfm';
 import { ChatIcons } from './ChatIcons';
 
-const CodeBlock = ({ match, children, customProps }: { match: RegExpExecArray; children: React.ReactNode; customProps: any }) => {
+const CodeBlock = ({
+  match,
+  children,
+  customProps,
+}: {
+  match: RegExpExecArray;
+  children: React.ReactNode;
+  customProps: any;
+}) => {
   const [copied, setCopied] = useState(false);
   const codeString = String(children).replace(/\n$/, '');
 
@@ -29,7 +31,7 @@ const CodeBlock = ({ match, children, customProps }: { match: RegExpExecArray; c
       await navigator.clipboard.writeText(codeString);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (e) { }
+    } catch (e) {}
   };
 
   return (
@@ -74,16 +76,34 @@ export const markdownComponents: any = {
         {children}
       </CodeBlock>
     ) : (
-      <code className="bg-zinc-700/50 text-zinc-200 px-1.5 py-0.5 rounded text-xs font-mono break-words" {...props}>
+      <code
+        className="bg-zinc-700/50 text-zinc-200 px-1.5 py-0.5 rounded text-xs font-mono break-words"
+        {...props}
+      >
         {children}
       </code>
     );
   },
-  p: ({ children }: any) => <p className="mb-2 last:mb-0 leading-relaxed text-sm break-words whitespace-pre-wrap">{children}</p>,
+  p: ({ children }: any) => (
+    <p className="mb-2 last:mb-0 leading-relaxed text-sm break-words whitespace-pre-wrap">
+      {children}
+    </p>
+  ),
   ul: ({ children }: any) => <ul className="list-disc pl-5 mb-2 space-y-1 text-sm">{children}</ul>,
-  ol: ({ children }: any) => <ol className="list-decimal pl-5 mb-2 space-y-1 text-sm">{children}</ol>,
+  ol: ({ children }: any) => (
+    <ol className="list-decimal pl-5 mb-2 space-y-1 text-sm">{children}</ol>
+  ),
   li: ({ children }: any) => <li className="break-words">{children}</li>,
-  a: ({ children, href }: any) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline underline-offset-2 break-all">{children}</a>,
+  a: ({ children, href }: any) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-400 hover:text-blue-300 underline underline-offset-2 break-all"
+    >
+      {children}
+    </a>
+  ),
 };
 
 export const markdownPlugins = [remarkGfm];
