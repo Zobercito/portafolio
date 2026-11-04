@@ -1,5 +1,2 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 # Pre-push hook: verify antes de pushear
 npm run check && npm test && npm run build

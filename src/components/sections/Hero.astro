@@ -40,7 +40,23 @@ const { firstName, lastName, role, tagline, socialLinks } = Astro.props;
       {tagline}
     </p>
 
-    <div class="flex flex-wrap gap-3 animate-fade-up delay-4">
+    <div class="mb-8 flex flex-wrap items-center gap-3 animate-fade-up delay-4">
+      <a
+        href="#experience"
+        class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-5 py-2.5 text-sm font-medium text-zinc-950 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+      >
+        Explorar mi experiencia
+        <span aria-hidden="true">↓</span>
+      </a>
+      <a
+        href="#contact"
+        class="inline-flex items-center rounded-full border border-zinc-700 px-5 py-2.5 text-sm font-medium text-zinc-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-zinc-500 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+      >
+        Hablemos
+      </a>
+    </div>
+
+    <div class="flex flex-wrap gap-3 animate-fade-up delay-4" aria-label="Enlaces sociales y CV">
       {
         socialLinks.map((link) =>
           link.label === "github" ? (
@@ -62,5 +78,6 @@ const { firstName, lastName, role, tagline, socialLinks } = Astro.props;
         )
       }
     </div>
+
   </div>
 </section>

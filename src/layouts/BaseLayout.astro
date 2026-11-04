@@ -27,7 +27,6 @@ const ogImage = new URL(image, Astro.site ?? Astro.url).toString();
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#09090b" />
-    <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/og-image.jpg" />
     <title>{title}</title>
 
@@ -134,9 +133,9 @@ const ogImage = new URL(image, Astro.site ?? Astro.url).toString();
       initSpaceCanvas();
       initSlideEngine();
       initContactForm();
-      
-      // Analytics: Track Web Vitals
-      if (typeof window !== 'undefined') {
+
+      // Web Vitals
+      if (typeof window !== "undefined") {
         trackWebVitals();
       }
     </script>

@@ -1,7 +1,10 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import { fileURLToPath } from 'node:url';
 
 import tailwindcss from '@tailwindcss/vite';
+
+const emptyModule = fileURLToPath(new URL('./src/empty.js', import.meta.url));
 
 import react from '@astrojs/react';
 import cloudflare from '@astrojs/cloudflare';
@@ -22,15 +25,20 @@ export default defineConfig({
     resolve: {
       conditions: ['workerd', 'worker', 'browser'],
       alias: {
-        tty: '/src/empty.js',
-        util: '/src/empty.js',
-        path: '/src/empty.js',
-        'node:tty': '/src/empty.js',
-        'node:util': '/src/empty.js',
-        'node:path': '/src/empty.js',
+        tty: emptyModule,
+        util: emptyModule,
+        path: emptyModule,
+        'node:tty': emptyModule,
+        'node:util': emptyModule,
+        'node:path': emptyModule,
       },
     },
     plugins: [tailwindcss()],
+    server: {
+      watch: {
+        ignored: ['**/.agents/**', '**/.claude/**', '**/.continue/**', '**/.kiro/**'],
+      },
+    },
     build: {
       minify: 'terser',
       terserOptions: {

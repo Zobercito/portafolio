@@ -1,7 +1,10 @@
 {
-  "*.{ts,tsx,astro}": [
+  "*.{ts,tsx}": [
     "npm run check -- --fix",
     "prettier --write"
+  ],
+  "*.astro": [
+    "npm run check -- --fix"
   ],
   "*.json": [
     "prettier --write"
