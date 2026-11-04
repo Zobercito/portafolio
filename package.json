@@ -16,7 +16,10 @@
     "test:csp": "playwright test --config playwright.csp.config.ts",
     "smoke": "node scripts/smoke.mjs",
     "eval": "node scripts/eval-prompt.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "prepare": "husky install",
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write ."
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.4.2",
@@ -40,6 +43,10 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "eslint": "^10.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
     "terser": "^5.51.2",
     "typescript": "^5.9.3"
   }

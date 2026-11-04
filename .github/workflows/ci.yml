@@ -7,6 +7,7 @@ on:
 
 jobs:
   verify:
+    name: Verify (type check, lint, unit tests, build)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,10 +30,8 @@ jobs:
         run: npm run build
 
   e2e:
-    name: E2E y snapshots (Playwright)
+    name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    # La imagen oficial trae los navegadores y las fuentes con las que se
-    # generaron los snapshots; en otra imagen el renderizado daría diferencias.
     container:
       image: mcr.microsoft.com/playwright:v1.64.1-noble
     steps:
@@ -41,10 +40,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Playwright
+      - name: Run E2E tests
         run: npx playwright test
 
-      - name: Subir informe
+      - name: Upload report on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -55,13 +54,8 @@ jobs:
           retention-days: 7
 
   csp:
-    name: CSP sobre el build (Playwright + wrangler)
+    name: CSP Validation (Playwright + wrangler)
     runs-on: ubuntu-latest
-    # No usa la imagen oficial de Playwright: aquí hace falta workerd (lo levanta
-    # `wrangler dev`), y dentro de ese contenedor el proxy de Cloudflare no llega
-    # a abrir puerto — el build de prerrenderizado se cae con ECONNREFUSED. En la
-    # runner normal el mismo build sí funciona. No hay capturas, así que da igual
-    # que las fuentes no sean las de la imagen de snapshots.
     steps:
       - uses: actions/checkout@v4
 
@@ -73,20 +67,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # `scripts/apply-csp.mjs` corre dentro de `npm run build`: sin ese paso el
-      # _headers no lleva los hashes de los scripts inline y todo fallaría aquí.
       - name: Build
         run: npm run build
 
       - name: Install browser
         run: npx playwright install --with-deps chromium
 
-      - name: CSP
+      - name: CSP Tests
         run: npx playwright test --config playwright.csp.config.ts
         env:
           WRANGLER_SEND_METRICS: 'false'
 
-      - name: Subir informe
+      - name: Upload report on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:

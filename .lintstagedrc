@@ -1,0 +1,12 @@
+{
+  "*.{ts,tsx,astro}": [
+    "npm run check -- --fix",
+    "prettier --write"
+  ],
+  "*.json": [
+    "prettier --write"
+  ],
+  "*.mjs": [
+    "prettier --write"
+  ]
+}
