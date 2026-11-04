@@ -70,7 +70,10 @@ class ShootingStar {
   maxLife!: number;
   dead!: boolean;
 
-  constructor(private width: number, private height: number) {
+  constructor(
+    private width: number,
+    private height: number
+  ) {
     this.init();
   }
 
@@ -99,8 +102,7 @@ class ShootingStar {
     this.y += this.dy * step;
     this.life += step;
     this.opacity = (1 - this.life / this.maxLife) * this.baseOpacity;
-    if (this.life >= this.maxLife || this.x < -300 || this.y > this.height + 300)
-      this.dead = true;
+    if (this.life >= this.maxLife || this.x < -300 || this.y > this.height + 300) this.dead = true;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -110,32 +112,32 @@ class ShootingStar {
       this.x,
       this.y,
       this.x - ((this.dx * this.length) / magnitude) * 0.8,
-      this.y - ((this.dy * this.length) / magnitude) * 0.8,
+      this.y - ((this.dy * this.length) / magnitude) * 0.8
     );
-    const colorRGB = this.layer === 0 ? "200,230,255" : "255,245,230";
+    const colorRGB = this.layer === 0 ? '200,230,255' : '255,245,230';
     gradient.addColorStop(0, `rgba(${colorRGB},${this.opacity})`);
     gradient.addColorStop(0.2, `rgba(180,220,255,${this.opacity * 0.7})`);
-    gradient.addColorStop(1, "rgba(100,150,255,0)");
+    gradient.addColorStop(1, 'rgba(100,150,255,0)');
     ctx.beginPath();
     ctx.strokeStyle = gradient;
     ctx.lineWidth = this.lineWidth;
-    ctx.lineCap = "round";
+    ctx.lineCap = 'round';
     ctx.moveTo(this.x, this.y);
     ctx.lineTo(
       this.x - (this.dx * this.length) / magnitude,
-      this.y - (this.dy * this.length) / magnitude,
+      this.y - (this.dy * this.length) / magnitude
     );
     ctx.stroke();
   }
 }
 
 export function initSpaceCanvas() {
-  const canvas = document.querySelector("[data-canvas]") as HTMLCanvasElement | null;
+  const canvas = document.querySelector('[data-canvas]') as HTMLCanvasElement | null;
   if (!canvas) return;
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   let width = 0;
   let height = 0;
@@ -145,6 +147,7 @@ export function initSpaceCanvas() {
   let frameId: number | null = null;
   let lastFrame = 0;
   let running = false;
+  let isPaused = false; // Control de pausa durante scroll
 
   function resize() {
     // 1,5 en vez de 2: el fondo no tiene detalle fino y el `clearRect` de cada
@@ -186,6 +189,10 @@ export function initSpaceCanvas() {
 
   function animate(now: number) {
     frameId = requestAnimationFrame(animate);
+
+    // Pausar animación durante scroll-snap
+    if (isPaused) return;
+
     const elapsed = now - lastFrame;
     if (elapsed < FRAME_MS) return;
     lastFrame = now;
@@ -219,12 +226,12 @@ export function initSpaceCanvas() {
     frameId = null;
   }
 
-  document.addEventListener("visibilitychange", () => {
+  document.addEventListener('visibilitychange', () => {
     if (document.hidden) stop();
     else start();
   });
 
-  motionQuery.addEventListener("change", () => {
+  motionQuery.addEventListener('change', () => {
     if (motionQuery.matches) {
       stop();
       drawStatic();
@@ -234,13 +241,29 @@ export function initSpaceCanvas() {
   });
 
   resize();
-  window.addEventListener("resize", resize);
+  window.addEventListener('resize', resize);
 
   // `resize()` ya pintó el fondo estático; el bucle arranca cuando el hilo
   // respira, para no pelear con la hidratación de las islas ni con el LCP.
-  if (typeof window.requestIdleCallback === "function") {
+  if (typeof window.requestIdleCallback === 'function') {
     window.requestIdleCallback(() => start(), { timeout: 1_500 });
   } else {
     window.setTimeout(start, 200);
   }
+
+  // API pública para pausar/resumir desde slideEngine
+  const canvasControls = {
+    pause: () => {
+      isPaused = true;
+    },
+    resume: () => {
+      isPaused = false;
+    },
+  };
+
+  // Escuchar eventos de scroll desde slideEngine
+  window.addEventListener('canvas:pause', canvasControls.pause);
+  window.addEventListener('canvas:resume', canvasControls.resume);
+
+  return canvasControls;
 }
