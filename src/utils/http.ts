@@ -74,17 +74,45 @@ export function jsonError(
   return jsonResponse(code ? { error: message, code } : { error: message }, status, extraHeaders);
 }
 
+/**
+ * Extrae la IP del cliente desde headers confiables.
+ *
+ * En Cloudflare Workers, `cf-connecting-ip` es la única fuente segura: Cloudflare
+ * la inyecta en cada request y no puede ser spoofed. `X-Forwarded-For` y
+ * `X-Real-IP` pueden ser inyectados por atacantes, así que solo se consideran
+ * si `CF-Ray` (que indica que la solicitud vino del edge de Cloudflare) está
+ * presente. Si no hay CF-Ray, retornamos 'unknown' en lugar de confiar en headers
+ * que pueden ser manipulados.
+ *
+ * Esto previene bypasses de rate limiting via IP spoofing.
+ */
 export function getClientIp(request: Request): string {
-  const direct =
-    request.headers.get('cf-connecting-ip') ??
-    request.headers.get('x-real-ip');
-  if (direct) return direct.trim();
+  // Verificar que la solicitud viene del edge de Cloudflare
+  const cfRay = request.headers.get('cf-ray');
+  const isTrustedOrigin = cfRay !== null;
 
-  const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded) {
-    const first = forwarded.split(',')[0]?.trim();
-    if (first) return first;
+  // cf-connecting-ip siempre es confiable (inyectado por CF)
+  const cfConnectingIp = request.headers.get('cf-connecting-ip');
+  if (cfConnectingIp) {
+    return cfConnectingIp.trim();
   }
 
+  // x-real-ip solo es confiable si viene de CF edge
+  if (isTrustedOrigin) {
+    const realIp = request.headers.get('x-real-ip');
+    if (realIp) return realIp.trim();
+
+    // x-forwarded-for solo es confiable si viene de CF edge
+    const forwarded = request.headers.get('x-forwarded-for');
+    if (forwarded) {
+      const first = forwarded.split(',')[0]?.trim();
+      if (first) return first;
+    }
+  }
+
+  // Si no tenemos CF-Ray, no confiamos en headers que pueden ser spoofed
+  // En desarrollo local (wrangler dev), CF-Ray no está disponible, así que
+  // 'unknown' es esperado. En producción, esto indica una solicitud directa
+  // sin pasar por CF (potencial ataque o misconfiguration).
   return 'unknown';
 }
