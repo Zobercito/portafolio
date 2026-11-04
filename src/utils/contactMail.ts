@@ -35,9 +35,13 @@ export function resolveContactMailConfig(env: ResendEnvSlice): ContactMailConfig
 export async function sendContactMail(
   config: ContactMailConfig,
   input: ContactMailInput,
-  fetchImpl: FetchLike = fetch,
+  fetchImpl: FetchLike = fetch
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
+    // Timeout de 10 segundos para Resend
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     const response = await fetchImpl(RESEND_ENDPOINT, {
       method: 'POST',
       headers: {
@@ -51,7 +55,10 @@ export async function sendContactMail(
         subject: `Nuevo mensaje de ${input.name} desde Portafolio`,
         text: `Nombre: ${input.name}\nEmail: ${input.email}\n\n${input.message}`,
       }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       let message = `El envío de correo falló (${response.status})`;
@@ -65,7 +72,10 @@ export async function sendContactMail(
     }
 
     return { ok: true };
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      return { ok: false, error: 'El envío de correo tardó demasiado. Intenta de nuevo.' };
+    }
     return { ok: false, error: 'No se pudo enviar el correo. Intenta de nuevo.' };
   }
 }
