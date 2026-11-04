@@ -21,10 +21,6 @@ export default defineConfig({
   vite: {
     resolve: {
       conditions: ['workerd', 'worker', 'browser'],
-      // groq-sdk imports Node builtins that do not exist in Workers. They are
-      // only used by Node-specific code paths, so they are aliased to a no-op
-      // module to keep the Worker bundle buildable. Revisit if the SDK starts
-      // requiring real implementations of these modules.
       alias: {
         'tty': '/src/empty.js',
         'util': '/src/empty.js',
@@ -34,15 +30,21 @@ export default defineConfig({
         'node:path': '/src/empty.js'
       }
     },
-    // @ts-ignore
     plugins: [tailwindcss()],
+    build: {
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: false,
+          pure_funcs: ['console.debug']
+        }
+      },
+      brotliSize: false
+    },
     optimizeDeps: {
       include: ['react-dom/client', 'react-dom']
     },
     ssr: {
-      // Sin estas pistas el optimizador de SSR descubre react/jsx-dev-runtime y
-      // @astrojs/react/server.js a media primera petición, reinicia el grafo y
-      // las islas quedan con dos copias de React: `useState` devuelve null.
       optimizeDeps: {
         include: [
           'react',
