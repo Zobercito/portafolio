@@ -74,6 +74,7 @@ test('jsonError incluye código cuando se fornece', async () => {
 test('getClientIp prioriza cf-connecting-ip', () => {
   const request = new Request('https://example.test', {
     headers: {
+      'cf-ray': '8a1b2c3d4e5f6g7h-ORD',
       'cf-connecting-ip': '198.51.100.7',
       'x-real-ip': '198.51.100.8',
       'x-forwarded-for': '198.51.100.9, 10.0.0.1',
@@ -83,12 +84,23 @@ test('getClientIp prioriza cf-connecting-ip', () => {
   assert.equal(getClientIp(request), '198.51.100.7');
 });
 
-test('getClientIp usa el primer valor de x-forwarded-for', () => {
+test('getClientIp usa el primer valor de x-forwarded-for si viene de CF edge', () => {
   const request = new Request('https://example.test', {
-    headers: { 'x-forwarded-for': ' 198.51.100.9 , 10.0.0.1' },
+    headers: {
+      'cf-ray': '8a1b2c3d4e5f6g7h-ORD',
+      'x-forwarded-for': ' 198.51.100.9 , 10.0.0.1',
+    },
   });
 
   assert.equal(getClientIp(request), '198.51.100.9');
+});
+
+test('getClientIp rechaza x-forwarded-for sin CF-Ray (previene IP spoofing)', () => {
+  const request = new Request('https://example.test', {
+    headers: { 'x-forwarded-for': '198.51.100.9, 10.0.0.1' },
+  });
+
+  assert.equal(getClientIp(request), 'unknown');
 });
 
 test('getClientIp devuelve unknown sin cabeceras', () => {

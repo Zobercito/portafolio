@@ -19,17 +19,18 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.2.1",
-    "@astrojs/react": "^4.4.2",
+    "@astrojs/cloudflare": "^14.4.2",
+    "@astrojs/react": "^7.1.1",
     "@tailwindcss/vite": "^4.2.1",
-    "astro": "^6.1.9",
+    "astro": "^7.4.2",
     "groq-sdk": "^1.1.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^16.1.1",
     "remark-gfm": "^4.0.1",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.2.1",
+    "wrangler": "^4.154.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.2",
