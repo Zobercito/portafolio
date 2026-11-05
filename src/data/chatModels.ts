@@ -16,7 +16,8 @@ export const CHAT_MODELS: ChatModel[] = [
     id: 'gpt-oss-120b',
     label: 'GPT OSS 120B',
     groqId: 'openai/gpt-oss-120b',
-    description: 'Modelo grande de OpenAI. Mejor razonamiento a cambio de algo más de latencia.',
+    description:
+      'Modelo abierto de OpenAI con 120B de parámetros. Razona mejor en preguntas complejas.',
     temperature: 1,
     topP: 1,
     reasoningEffort: 'medium',
@@ -27,12 +28,12 @@ export const CHAT_MODELS: ChatModel[] = [
     id: 'qwen-27b',
     label: 'Qwen 3.8 27B',
     groqId: 'qwen/qwen3.8-27b',
-    description: 'Modelo de Alibaba Cloud. Más rápido y económico, buen equilibrio general.',
+    description: 'Modelo de Alibaba Cloud con 27B de parámetros. Más ligero y rápido.',
     temperature: 0.6,
     topP: 0.95,
     reasoningEffort: 'default',
     maxCompletionTokens: 2048,
-  }
+  },
 ];
 
 export const DEFAULT_MODEL = CHAT_MODELS[0];
