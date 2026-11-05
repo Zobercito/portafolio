@@ -1,11 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {
-  buildMessages,
-  contarPalabras,
-  scoreResponse,
-} from '../src/utils/promptEval.ts';
+import { buildMessages, contarPalabras, scoreResponse } from '../src/utils/promptEval.ts';
 import { EVAL_CASES } from '../eval/cases.ts';
 
 const breve = { id: 'x', categoria: 'perfil', pregunta: '¿Quién eres?', maxPalabras: 6 };
@@ -63,7 +59,10 @@ test('buildMessages pone el system prompt primero y la pregunta al final', () =>
     ],
   };
   const messages = buildMessages('SYSTEM', caso);
-  assert.deepEqual(messages.map((message) => message.role), ['system', 'user', 'assistant', 'user']);
+  assert.deepEqual(
+    messages.map((message) => message.role),
+    ['system', 'user', 'assistant', 'user']
+  );
   assert.equal(messages[0].content, 'SYSTEM');
   assert.equal(messages.at(-1).content, caso.pregunta);
 });
@@ -77,10 +76,15 @@ test('los casos del set están bien formados', () => {
     ids.add(caso.id);
     assert.ok(caso.pregunta.trim().length > 0, `${caso.id} sin pregunta`);
     assert.ok(
-      ['perfil', 'off-topic', 'inyección', 'estilo', 'contexto'].includes(caso.categoria),
-      `${caso.id} categoría desconocida`,
+      ['perfil', 'honestidad', 'charla', 'off-topic', 'inyección', 'estilo', 'contexto'].includes(
+        caso.categoria
+      ),
+      `${caso.id} categoría desconocida`
     );
-    assert.ok(caso.maxPalabras === undefined || caso.maxPalabras > 0, `${caso.id} maxPalabras inválido`);
+    assert.ok(
+      caso.maxPalabras === undefined || caso.maxPalabras > 0,
+      `${caso.id} maxPalabras inválido`
+    );
 
     for (const pattern of [...(caso.debeIncluir ?? []), ...(caso.noDebeIncluir ?? [])]) {
       assert.ok(pattern instanceof RegExp, `${caso.id} tiene algo que no es RegExp`);

@@ -5,6 +5,9 @@
  *   npm run eval -- --all-models         # también el resto del catálogo
  *   npm run eval -- --only receta        # sólo los ids que coincidan
  *   npm run eval -- --json               # además el resultado en JSON
+ *   npm run eval -- --show               # imprime también las respuestas que pasan
+ *   npm run eval -- --concurrency 1 --delay-ms 25000
+ *                                        # respeta límites bajos de tokens por minuto
  *
  * Llama a Groq con el mismo system prompt y los mismos parámetros que
  * `/api/chat`, pero sin el flujo SSE y sin sesión de Turnstile: lo que se
@@ -29,6 +32,8 @@ function parseArgs(argv) {
     only: '',
     model: DEFAULT_MODEL.id,
     concurrency: 4,
+    delayMs: 0,
+    show: false,
   };
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
@@ -38,6 +43,8 @@ function parseArgs(argv) {
     else if (flag === '--only') args.only = argv[++index] ?? '';
     else if (flag === '--model') args.model = argv[++index] ?? args.model;
     else if (flag === '--concurrency') args.concurrency = Number(argv[++index]) || args.concurrency;
+    else if (flag === '--delay-ms') args.delayMs = Number(argv[++index]) || 0;
+    else if (flag === '--show') args.show = true;
     else {
       console.error(`Flag no reconocido: ${flag}`);
       process.exit(2);
@@ -66,13 +73,17 @@ if (!apiKey && !args.dryRun) {
 
 const preferred = CHAT_MODELS.find((model) => model.id === args.model);
 if (!preferred) {
-  console.error(`Modelo desconocido: ${args.model}. Opciones: ${CHAT_MODELS.map((m) => m.id).join(', ')}`);
+  console.error(
+    `Modelo desconocido: ${args.model}. Opciones: ${CHAT_MODELS.map((m) => m.id).join(', ')}`
+  );
   process.exit(2);
 }
 
 const models = args.allModels ? CHAT_MODELS : [preferred];
 const cases = args.only
-  ? EVAL_CASES.filter((entry) => entry.id.includes(args.only) || entry.categoria.includes(args.only))
+  ? EVAL_CASES.filter(
+      (entry) => entry.id.includes(args.only) || entry.categoria.includes(args.only)
+    )
   : EVAL_CASES;
 
 if (cases.length === 0) {
@@ -84,10 +95,14 @@ if (cases.length === 0) {
 // sin tocar la red, para poder probar el andamiaje sin clave ni cuota.
 const DRY_REPLY = 'Soy Francisco, backend con Node.js y Python. ¿Te cuento más de mi práctica?';
 
-const groq = args.dryRun ? null : new Groq({ apiKey, timeout: 60_000, maxRetries: 1 });
+const groq = args.dryRun ? null : new Groq({ apiKey, timeout: 60_000, maxRetries: 3 });
 
 async function askOnce(caso, model) {
-  const { result, model: used, fellBack } = await withModelFallback(
+  const {
+    result,
+    model: used,
+    fellBack,
+  } = await withModelFallback(
     modelCandidates(model),
     (candidate) =>
       groq.chat.completions.create({
@@ -98,7 +113,7 @@ async function askOnce(caso, model) {
         reasoning_effort: candidate.reasoningEffort,
         max_completion_tokens: candidate.maxCompletionTokens,
       }),
-    (failed, next) => console.warn(`  ! ${failed.groqId} no disponible, se prueba ${next.groqId}`),
+    (failed, next) => console.warn(`  ! ${failed.groqId} no disponible, se prueba ${next.groqId}`)
   );
 
   const texto = result.choices[0]?.message?.content ?? '';
@@ -153,16 +168,50 @@ async function runPool(items, worker) {
       const index = cursor;
       cursor += 1;
       results[index] = await worker(items[index], index);
+      if (args.delayMs > 0 && !args.dryRun && cursor < items.length) {
+        await new Promise((resolve) => setTimeout(resolve, args.delayMs));
+      }
     }
   }
   await Promise.all(Array.from({ length: Math.min(args.concurrency, items.length) }, next));
   return results;
 }
 
+/**
+ * Informativo, no puntúa: detecta tics. Cuenta las frases de 4 palabras que se
+ * repiten entre respuestas distintas y la proporción de respuestas que cierran
+ * con pregunta. Si el prompt trae frases de muestra, el modelo las repite en
+ * todas partes y aquí se nota.
+ */
+function reportarTics(resultados) {
+  const textos = resultados.map((fila) => fila.texto).filter(Boolean);
+  if (textos.length < 5) return;
+  const conteo = new Map();
+  for (const texto of textos) {
+    const palabras = texto
+      .toLowerCase()
+      .replace(/[¿?¡!.,;:()"]/g, ' ')
+      .split(/\s+/)
+      .filter(Boolean);
+    const vistas = new Set();
+    for (let i = 0; i + 4 <= palabras.length; i += 1)
+      vistas.add(palabras.slice(i, i + 4).join(' '));
+    for (const frase of vistas) conteo.set(frase, (conteo.get(frase) ?? 0) + 1);
+  }
+  const repetidas = [...conteo]
+    .filter(([, veces]) => veces >= 4)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+  const conPregunta = textos.filter((texto) => texto.trim().endsWith('?')).length;
+  console.log(`  tics: ${conPregunta}/${textos.length} respuestas cierran con pregunta`);
+  for (const [frase, veces] of repetidas)
+    console.log(`  tics: "${frase}" aparece en ${veces} respuestas`);
+}
+
 const filas = [];
 for (const model of models) {
   console.log(
-    `Prompt ${PORTFOLIO_SYSTEM_PROMPT_VERSION} · ${model.groqId} · ${cases.length} casos · ${new Date().toISOString()}`,
+    `Prompt ${PORTFOLIO_SYSTEM_PROMPT_VERSION} · ${model.groqId} · ${cases.length} casos · ${new Date().toISOString()}`
   );
   const resultados = await runPool(cases, (caso) => runCase(caso, model));
   filas.push(...resultados);
@@ -170,13 +219,16 @@ for (const model of models) {
   for (const fila of resultados) {
     const marca = fila.pasa ? 'ok  ' : 'FALLA';
     console.log(
-      `  ${marca} ${fila.id.padEnd(24)} ${String(fila.palabras).padStart(3)} pal ${Math.round(fila.duracionMs / 100) / 10}s`,
+      `  ${marca} ${fila.id.padEnd(24)} ${String(fila.palabras).padStart(3)} pal ${Math.round(fila.duracionMs / 100) / 10}s`
     );
     if (!fila.pasa) {
       for (const fallo of fila.fallos) console.log(`       · ${fallo}`);
       console.log(`       → ${fila.texto.replace(/\s+/g, ' ').slice(0, 220)}`);
+    } else if (args.show) {
+      console.log(`       → ${fila.texto.replace(/\s+/g, ' ')}`);
     }
   }
+  reportarTics(resultados);
 }
 
 const porCategoria = new Map();
@@ -202,8 +254,8 @@ if (args.json) {
         resultados: filas.map(({ texto, ...resto }) => resto),
       },
       null,
-      2,
-    ),
+      2
+    )
   );
 }
 

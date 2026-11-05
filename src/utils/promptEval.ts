@@ -8,7 +8,8 @@ export interface EvalMessage {
   content: string;
 }
 
-export type EvalCategory = 'perfil' | 'off-topic' | 'inyección' | 'estilo' | 'contexto';
+export type EvalCategory =
+  'perfil' | 'honestidad' | 'charla' | 'off-topic' | 'inyección' | 'estilo' | 'contexto';
 
 export interface EvalCase {
   id: string;
@@ -32,8 +33,9 @@ export interface EvalScore {
   fallos: string[];
 }
 
-const FIRST_PERSON_PATTERN = /\b(yo|me|mi|mí|soy|estoy|he|hice|fue|trabaj|optimic|estudi|complet)\b/i;
-const THIRD_PERSON_PATTERN = /\b(él es|es francisco|francisco (?:es|tiene|estudi|trabaj)|el (?:autor|creador|desarrollador))\b/i;
+const FIRST_PERSON_PATTERN = /\b(yo|me|mi|mí|soy|estoy|he|hice|fue|trabaj|estudi|complet)\b/i;
+const THIRD_PERSON_PATTERN =
+  /\b(él es|es francisco|francisco (?:es|tiene|estudi|trabaj)|el (?:autor|creador|desarrollador))\b/i;
 
 export function contarPalabras(texto: string): number {
   return texto.trim().split(/\s+/).filter(Boolean).length;
