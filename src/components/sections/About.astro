@@ -1,5 +1,13 @@
 ---
 import MiniChat from "../MiniChat";
+import { calculateAge } from "../../utils/age";
+
+const age = calculateAge();
+const linkClass =
+  "font-semibold text-zinc-200 underline decoration-zinc-600 underline-offset-4 transition-colors hover:text-white hover:decoration-zinc-300";
+
+const flipButtonClass =
+  "absolute left-1/2 top-[calc(100%-1px)] z-0 flex h-9 -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap rounded-b-xl border border-t-0 border-zinc-800/80 bg-zinc-900/30 backdrop-blur-sm px-4 text-sm text-zinc-400 transition-colors duration-300 hover:bg-zinc-800/40 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400";
 ---
 
 <section
@@ -14,27 +22,113 @@ import MiniChat from "../MiniChat";
       </h2>
       <div class="space-y-2 xl:space-y-4 text-zinc-400 leading-relaxed text-sm xl:text-base">
         <p>
-          Soy Francisco, desarrollador Fullstack en último año desde Panamá.
-          Me gusta construir cosas que funcionen bien por dentro: APIs
-          limpias, bases de datos bien diseñadas, lógica que escale.
+          Soy Francisco, tengo <span data-age>{age}</span> años y soy un desarrollador full stack de Panamá. Estudio mi último año de Ingeniería en Informática y me gusta construir aplicaciones web completas, desde la base de datos hasta la interfaz.
         </p>
         <p>
-          Busco oportunidades donde construir cosas que importen, aprender
-          y crecer constantemente. Si tienes un problema interesante,
-          probablemente quiera resolverlo.
+          Tengo proyectos propios desplegados, como <a href="https://github.com/Zobercito/Adopty" target="_blank" rel="noopener noreferrer" class={linkClass}>Adopty</a>, una plataforma de adopción de mascotas en Panamá, y <a href="https://github.com/Zobercito/codestart_fiec" target="_blank" rel="noopener noreferrer" class={linkClass}>CodeStart FIEC</a>, una plataforma de apoyo al curso propedéutico de mi facultad. Fuera de la web me gusta crear herramientas para Linux, colaborar en proyectos open-source y también me apasiona la electrónica. Si quieres conocer más de mis proyectos, visita mi <a href="https://github.com/Zobercito" target="_blank" rel="noopener noreferrer" class={linkClass}>GitHub</a>.
         </p>
         <p>
-          ¡Y si quieres saber más sobre mí, no dudes en preguntarle a mi
-          IA en el chat!
+          Busco mi primer puesto como desarrollador, en un equipo donde pueda aprender y aportar desde el primer día.
+        </p>
+        <p>
+          Si quieres saber más sobre mí, de mis proyectos o de mis redes, ¡pregúntale a mi IA en el chat!
         </p>
       </div>
     </div>
 
-    <div
-      id="minichat-container"
-      class="relative w-full md:max-w-2xl md:mx-auto h-[clamp(12rem,calc(100svh-26rem),20rem)] md:h-[32rem] xl:h-[28rem] rounded-2xl border border-zinc-800/80 bg-zinc-900/30 backdrop-blur-sm overflow-hidden flex flex-col transition-transform duration-300"
-    >
-      <MiniChat client:idle />
+    <div class="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto" data-flip-root>
+      <div class="flip-scene mb-9 h-[clamp(12rem,calc(100svh-29rem),20rem)] md:h-[32rem] xl:h-[28rem]">
+        <div class="flip-card" data-flip-card>
+          <div class="flip-face" data-flip-face="photo">
+            <div class="absolute inset-0 z-10 overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/30">
+              <img
+                src="https://github.com/Zobercito.png?size=800"
+                alt="Foto de Francisco González"
+                width="800"
+                height="800"
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+              />
+            </div>
+            <button type="button" data-flip-toggle class={flipButtonClass}>
+              <span aria-hidden="true">↻</span>
+              Abrir el chat
+            </button>
+          </div>
+
+          <div class="flip-face flip-back" data-flip-face="chat" inert aria-hidden="true">
+            <div class="absolute inset-0 z-10 overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/30 backdrop-blur-sm">
+              <div id="minichat-container" class="relative flex h-full w-full flex-col overflow-hidden transition-transform duration-300">
+                <MiniChat client:idle />
+              </div>
+            </div>
+            <button type="button" data-flip-toggle class={flipButtonClass}>
+              <span aria-hidden="true">↻</span>
+              Ver mi foto
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
+
+<style>
+  .flip-scene {
+    perspective: 1200px;
+  }
+  .flip-card {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+  }
+  .flip-card[data-flipped="true"] {
+    transform: rotateY(180deg);
+  }
+  .flip-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .flip-back {
+    transform: rotateY(180deg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .flip-card {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { calculateAge } from "../../utils/age";
+
+  const ageNode = document.querySelector("[data-age]");
+  if (ageNode) ageNode.textContent = String(calculateAge());
+
+  const root = document.querySelector<HTMLElement>("[data-flip-root]");
+  const card = root?.querySelector<HTMLElement>("[data-flip-card]");
+  const photo = root?.querySelector<HTMLElement>('[data-flip-face="photo"]');
+  const chat = root?.querySelector<HTMLElement>('[data-flip-face="chat"]');
+
+  if (root && card && photo && chat) {
+    const setFace = (face: HTMLElement, visible: boolean) => {
+      face.toggleAttribute("inert", !visible);
+      face.setAttribute("aria-hidden", String(!visible));
+    };
+
+    root.querySelectorAll<HTMLButtonElement>("[data-flip-toggle]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const showChat = card.dataset.flipped !== "true";
+        card.dataset.flipped = String(showChat);
+        setFace(chat, showChat);
+        setFace(photo, !showChat);
+        (showChat ? chat : photo).querySelector<HTMLButtonElement>("[data-flip-toggle]")?.focus({ preventScroll: true });
+      });
+    });
+  }
+</script>

@@ -3,6 +3,7 @@ import NameTypewriter from "../NameTypewriter";
 import GithubPreviewButton from "../GithubPreviewButton.astro";
 import SocialButton from "../SocialButton.astro";
 import type { SocialLink } from "../../types/portfolio";
+import { icons } from "../../data/icons";
 
 interface Props {
   firstName: string;
@@ -58,24 +59,55 @@ const { firstName, lastName, role, tagline, socialLinks } = Astro.props;
 
     <div class="flex flex-wrap gap-3 animate-fade-up delay-4" aria-label="Enlaces sociales y CV">
       {
-        socialLinks.map((link) =>
-          link.label === "github" ? (
-            <GithubPreviewButton
-              href={link.href}
-              label={link.label}
-              icon={link.icon}
-              iconHover={link.iconHover}
-            />
-          ) : (
-            <SocialButton
-              href={link.href}
-              label={link.label}
-              icon={link.icon}
-              iconHover={link.iconHover}
-              download={link.download}
-            />
-          )
-        )
+        socialLinks
+          .filter((link) => link.label !== "email")
+          .map((link) => {
+            if (link.label === "github") {
+              return (
+                <GithubPreviewButton
+                  href={link.href}
+                  label={link.label}
+                  icon={link.icon}
+                  iconHover={link.iconHover}
+                />
+              );
+            }
+            if (link.label === "linkedin") {
+              return (
+                <>
+                  <SocialButton
+                    href={link.href}
+                    label={link.label}
+                    icon={link.icon}
+                    iconHover={link.iconHover}
+                    download={link.download}
+                  />
+                  <button
+                    data-copy-email
+                    class="group inline-flex items-center justify-center gap-2 border border-zinc-800
+                           text-zinc-400 text-sm px-4 py-2 rounded-full
+                           hover:border-zinc-600 hover:text-zinc-100 hover:scale-105 hover:-translate-y-0.5
+                           transition-all duration-300"
+                  >
+                    <div class="relative w-5 h-5 shrink-0 flex items-center justify-center">
+                      <span set:html={icons.email.outline} class="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0 flex items-center justify-center" />
+                      <span set:html={icons.email.filled} class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-center justify-center" />
+                    </div>
+                    <span data-copy-label class="leading-none">Copiar correo</span>
+                  </button>
+                </>
+              );
+            }
+            return (
+              <SocialButton
+                href={link.href}
+                label={link.label}
+                icon={link.icon}
+                iconHover={link.iconHover}
+                download={link.download}
+              />
+            );
+          })
       }
     </div>
 

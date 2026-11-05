@@ -16,14 +16,14 @@ const target = href.startsWith("mailto") ? "_self" : "_blank";
   target={target}
   rel="noopener noreferrer"
   download={download}
-  class="group inline-flex items-center gap-2 border border-zinc-800
+  class="group inline-flex items-center justify-center gap-2 border border-zinc-800
          text-zinc-400 text-sm px-4 py-2 rounded-full
          hover:border-zinc-600 hover:text-zinc-100 hover:scale-105 hover:-translate-y-0.5
          transition-all duration-300"
 >
-  <div class="relative w-5 h-5 shrink-0">
-    <span set:html={icon} class="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0" />
-    <span set:html={iconHover} class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+  <div class="relative w-5 h-5 shrink-0 flex items-center justify-center">
+    <span set:html={icon} class="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0 flex items-center justify-center" />
+    <span set:html={iconHover} class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-center justify-center" />
   </div>
-  {label}
+  <span class="leading-none">{label}</span>
 </a>
