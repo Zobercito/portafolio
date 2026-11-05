@@ -32,13 +32,14 @@ export const workExperience: WorkExperience[] = [
     logo: '/img/inventario-logo.svg',
     period: 'Ene 2026 – Mar 2026',
     location: 'Panamá (Semirremoto)',
-    description: 'Diseñé herramientas internas Full-Stack para optimizar la gestión de datos mediante procesos automatizados, priorizando seguridad y eficiencia.',
+    description:
+      'Diseñé herramientas internas Full-Stack para optimizar la gestión de datos mediante procesos automatizados, priorizando seguridad y eficiencia.',
     bullets: [
       'Gestor de archivos privado con RBAC, JWT y Bcrypt (Next.js, Node.js, Prisma).',
       'Scripts en Python para clasificación masiva de registros y gestión de contactos.',
-      'Interfaces adaptables de alto rendimiento con Astro y Tailwind CSS.'
-    ]
-  }
+      'Interfaces adaptables de alto rendimiento con Astro y Tailwind CSS.',
+    ],
+  },
 ];
 
 export const education: Education[] = [
@@ -50,8 +51,8 @@ export const education: Education[] = [
     institutionUrl: 'https://www.up.ac.pa/',
     facultyUrl: 'https://fiec.up.ac.pa/',
     logo: '/img/UP-logo.png',
-    period: '2021 — Actualidad'
-  }
+    period: '2021 — Actualidad',
+  },
 ];
 
 export const projects: (ModalItemData | string)[] = [
@@ -61,11 +62,67 @@ export const projects: (ModalItemData | string)[] = [
     video: '/img/projects/Portfolio.mp4',
     imageWidth: 1280,
     imageHeight: 720,
-    description: 'Plataforma personal interactiva diseñada para centralizar mi trayectoria, certificaciones y proyectos. Cuenta con un diseño premium enfocado en la experiencia de usuario, integrando un chatbot inteligente con IA para consultas dinámicas sobre mi perfil profesional.',
+    description:
+      'Plataforma personal interactiva diseñada para centralizar mi trayectoria, certificaciones y proyectos. Cuenta con un diseño premium enfocado en la experiencia de usuario, integrando un chatbot inteligente con IA para consultas dinámicas sobre mi perfil profesional.',
     url: 'https://github.com/Zobercito/portafolio',
-    skills: ['Astro', 'React', 'Tailwind CSS', 'TypeScript', 'Cloudflare Workers', 'IA Integration']
+    skills: [
+      'Astro',
+      'React',
+      'Tailwind CSS',
+      'TypeScript',
+      'Cloudflare Workers',
+      'IA Integration',
+    ],
   },
-  '', '', '', '', '', '' // 6 Placeholders remaining
+  {
+    title: 'Adopty',
+    image: '/img/projects/Adopty-poster.webp',
+    video: '/img/projects/Adopty.mp4',
+    imageWidth: 1280,
+    imageHeight: 720,
+    description:
+      'Plataforma web de adopción de mascotas en Panamá, desarrollada como proyecto académico. Permite buscar con filtros, calcular la afinidad entre adoptante y mascota según su estilo de vida, enviar solicitudes de adopción y chatear solo cuando la solicitud es aprobada, sin exponer el número personal de nadie. Los datos sensibles se protegen con políticas RLS en PostgreSQL. Disponible en adopty.lat.',
+    url: 'https://github.com/Zobercito/Adopty',
+    demoUrl: 'https://adopty.lat',
+    links: [{ text: 'adopty.lat', url: 'https://adopty.lat' }],
+    skills: ['Astro', 'TypeScript', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Vercel'],
+  },
+  {
+    title: 'CodeStart FIEC',
+    image: '/img/projects/CodeStart-poster.webp',
+    video: '/img/projects/CodeStart.mp4',
+    imageWidth: 1280,
+    imageHeight: 720,
+    description:
+      'Plataforma de apoyo al Curso Propedéutico de la FIEC, desarrollada como proyecto académico. Ofrece ocho módulos con lecciones interactivas, retos de C con validación estática y diagnóstico del error en lenguaje natural, además de medallas y un panel para que el docente siga el avance del grupo. La aplicación requiere inicio de sesión, por eso la demo es el prototipo navegable.',
+    url: 'https://github.com/Zobercito/codestart_fiec',
+    demoUrl: 'https://zobercito.github.io/codestart-fiec-mockup/',
+    skills: [
+      'Next.js',
+      'React',
+      'TypeScript',
+      'Tailwind CSS',
+      'Supabase',
+      'PostgreSQL',
+      'MDX',
+      'CodeMirror',
+    ],
+  },
+  {
+    title: 'Archivero',
+    image: '/img/projects/Archivero-poster.webp',
+    video: '/img/projects/Archivero.mp4',
+    imageWidth: 1280,
+    imageHeight: 720,
+    description:
+      'Gestor de archivos con tres roles (administración, edición y lectura), versiones, papelera y enlaces públicos que caducan por fecha o por descargas. La autorización se comprueba en la API, las contraseñas usan Argon2id y los archivos se guardan en un bucket privado con URLs firmadas.',
+    url: 'https://github.com/Zobercito/Archivero',
+    demoUrl: 'https://zobercito.github.io/Archivero/',
+    skills: ['React', 'TypeScript', 'Hono', 'PostgreSQL', 'Drizzle', 'S3', 'Docker', 'Playwright'],
+  },
+  '',
+  '',
+  '', // 3 Placeholders remaining
 ];
 
 export const certificates: (ModalItemData | string)[] = [
@@ -74,15 +131,24 @@ export const certificates: (ModalItemData | string)[] = [
     image: '/certs/SIC_2023-Francisco_Gonzalez.webp',
     imageWidth: 1600,
     imageHeight: 1132,
-    description: 'Certificación de 280 horas de formación técnica avanzada en Python e Inteligencia Artificial. Mi formación se centró en el desarrollo de software full-stack, análisis estadístico y la creación de modelos de Machine Learning y Deep Learning para la resolución de problemas reales y de alto impacto.',
-    skills: ['Python', 'Inteligencia Artificial', 'Machine Learning', 'Deep Learning', 'Análisis Estadístico', 'Desarrollo Full-stack']
+    description:
+      'Certificación de 280 horas de formación técnica avanzada en Python e Inteligencia Artificial. Mi formación se centró en el desarrollo de software full-stack, análisis estadístico y la creación de modelos de Machine Learning y Deep Learning para la resolución de problemas reales y de alto impacto.',
+    skills: [
+      'Python',
+      'Inteligencia Artificial',
+      'Machine Learning',
+      'Deep Learning',
+      'Análisis Estadístico',
+      'Desarrollo Full-stack',
+    ],
   },
   {
     title: 'Curso Profesional de Python - Código Facilito',
     image: '/certs/CursoCodigoFacilito-FranciscoGonzalez.webp',
     imageWidth: 1600,
     imageHeight: 1130,
-    description: 'Completé este curso de Python donde aprendí desde los fundamentos hasta conceptos avanzados como decoradores, closures y Programación Orientada a Objetos. Me enfoqué especialmente en dominar listas, tuplas, diccionarios y en escribir funciones y clases limpias, lo que me equipa para desarrollar soluciones fullstack eficientes y escalables.',
+    description:
+      'Completé este curso de Python donde aprendí desde los fundamentos hasta conceptos avanzados como decoradores, closures y Programación Orientada a Objetos. Me enfoqué especialmente en dominar listas, tuplas, diccionarios y en escribir funciones y clases limpias, lo que me equipa para desarrollar soluciones fullstack eficientes y escalables.',
     url: 'https://codigofacilito.com/certificates/06d3f966-da18-423f-9baa-46dc227ed710.pdf',
     skills: [
       'Python',
@@ -90,28 +156,77 @@ export const certificates: (ModalItemData | string)[] = [
       'Decoradores',
       'Closures',
       'Colecciones de Datos',
-      'Listas, Tuplas y Diccionarios'
-    ]
+      'Listas, Tuplas y Diccionarios',
+    ],
   },
-  '', '', '', '', '' // 5 Placeholders more for a total of 7
+  '',
+  '',
+  '',
+  '',
+  '', // 5 Placeholders more for a total of 7
 ];
 
 export const stackIcons = [
-  { name: 'Python', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
-  { name: 'JavaScript', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
-  { name: 'TypeScript', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
-  { name: 'Astro', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/astro/astro-original.svg' },
-  { name: 'React', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
-  { name: 'HTML', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg' },
+  {
+    name: 'Python',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+  },
+  {
+    name: 'JavaScript',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+  },
+  {
+    name: 'TypeScript',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
+  },
+  {
+    name: 'Astro',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/astro/astro-original.svg',
+  },
+  {
+    name: 'React',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+  },
+  {
+    name: 'HTML',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
+  },
   { name: 'CSS', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg' },
-  { name: 'Tailwind CSS', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg' },
-  { name: 'Vite', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vite/vite-original.svg' },
-  { name: 'Node.js', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
-  { name: 'Docker', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
-  { name: 'Prisma', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prisma/prisma-original.svg' },
-  { name: 'PostgreSQL', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' },
+  {
+    name: 'Tailwind CSS',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg',
+  },
+  {
+    name: 'Vite',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vite/vite-original.svg',
+  },
+  {
+    name: 'Node.js',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
+  },
+  {
+    name: 'Docker',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
+  },
+  {
+    name: 'Prisma',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prisma/prisma-original.svg',
+  },
+  {
+    name: 'PostgreSQL',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
+  },
   { name: 'Git', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg' },
-  { name: 'GitHub', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg' },
-  { name: 'Linux', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg' },
-  { name: 'Bash', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg' },
+  {
+    name: 'GitHub',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg',
+  },
+  {
+    name: 'Linux',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg',
+  },
+  {
+    name: 'Bash',
+    url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg',
+  },
 ];

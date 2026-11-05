@@ -1,4 +1,5 @@
 import type { ModalItemData } from '../ModalOverlay';
+import MiniVideo from '../MiniVideo';
 
 interface ModalGridProps {
   title: string;
@@ -23,7 +24,7 @@ export function ModalGrid({ title, items, onSelect }: ModalGridProps) {
               role={isInteractive ? 'button' : undefined}
               tabIndex={isInteractive ? 0 : undefined}
               aria-label={isInteractive ? `Ampliar ${itemTitle}` : undefined}
-              onClick={() => isInteractive ? onSelect(item as ModalItemData) : undefined}
+              onClick={() => (isInteractive ? onSelect(item as ModalItemData) : undefined)}
               onKeyDown={(event) => {
                 if (!isInteractive || (event.key !== 'Enter' && event.key !== ' ')) return;
                 event.preventDefault();
@@ -35,11 +36,30 @@ export function ModalGrid({ title, items, onSelect }: ModalGridProps) {
             >
               {imageUrl ? (
                 <>
-                  <img src={imageUrl} alt={itemTitle} draggable={false} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
+                  {(item as ModalItemData).video ? (
+                    <MiniVideo
+                      src={(item as ModalItemData).video as string}
+                      poster={imageUrl}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    />
+                  ) : (
+                    <img
+                      src={imageUrl}
+                      alt={itemTitle}
+                      draggable={false}
+                      loading="lazy"
+                      decoding="async"
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
                   <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 flex flex-col items-center text-center translate-y-3 group-hover:translate-y-0 transition-transform duration-300 ease-out">
-                    <span className="text-zinc-100 font-semibold text-sm sm:text-base drop-shadow-md">{itemTitle}</span>
-                    <span className="text-[9px] sm:text-[10px] text-zinc-400 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 uppercase tracking-widest font-medium">Click para ampliar</span>
+                    <span className="text-zinc-100 font-semibold text-sm sm:text-base drop-shadow-md">
+                      {itemTitle}
+                    </span>
+                    <span className="text-[9px] sm:text-[10px] text-zinc-400 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 uppercase tracking-widest font-medium">
+                      Click para ampliar
+                    </span>
                   </div>
                 </>
               ) : item && !isObj ? (

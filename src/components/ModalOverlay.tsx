@@ -15,6 +15,8 @@ export interface ModalItemData {
   video?: string;
   description?: string;
   url?: string;
+  demoUrl?: string;
+  links?: { text: string; url: string }[];
   skills?: string[];
 }
 
@@ -26,7 +28,13 @@ interface ModalOverlayProps {
   initialItem?: ModalItemData | null;
 }
 
-export default function ModalOverlay({ isOpen, title, items, onClose, initialItem }: ModalOverlayProps) {
+export default function ModalOverlay({
+  isOpen,
+  title,
+  items,
+  onClose,
+  initialItem,
+}: ModalOverlayProps) {
   const { shouldRender, showAnim } = useModalAnimation(isOpen);
   useBodyScrollLock(isOpen);
 
@@ -95,18 +103,22 @@ export default function ModalOverlay({ isOpen, title, items, onClose, initialIte
   const animOrigin = title === 'Proyectos' ? 'origin-[75%_25%]' : 'origin-[75%_65%]';
   const validItems = filterValidItems(items);
   const currentIndex = selectedItem
-    ? validItems.findIndex(i => i.title === selectedItem.title && i.image === selectedItem.image)
+    ? validItems.findIndex((i) => i.title === selectedItem.title && i.image === selectedItem.image)
     : -1;
   const showNavigation = validItems.length > 1;
 
   const handlePrev = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setSelectedItem(currentIndex > 0 ? validItems[currentIndex - 1] : validItems[validItems.length - 1]);
+    setSelectedItem(
+      currentIndex > 0 ? validItems[currentIndex - 1] : validItems[validItems.length - 1]
+    );
   };
 
   const handleNext = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setSelectedItem(currentIndex < validItems.length - 1 ? validItems[currentIndex + 1] : validItems[0]);
+    setSelectedItem(
+      currentIndex < validItems.length - 1 ? validItems[currentIndex + 1] : validItems[0]
+    );
   };
 
   return createPortal(
@@ -131,11 +143,21 @@ export default function ModalOverlay({ isOpen, title, items, onClose, initialIte
             : `scale-[0.85] opacity-0 shadow-none pointer-events-none ${animOrigin} z-[-1]`
         }`}
       >
-        <div className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${title === 'Proyectos' ? 'bg-[radial-gradient(circle_at_15%_20%,rgba(148,163,184,0.17),transparent_50%)]' : 'bg-[radial-gradient(circle_at_80%_30%,rgba(244,63,94,0.16),transparent_50%)]'} ${showAnim ? 'opacity-100' : 'opacity-0'}`} />
+        <div
+          className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${title === 'Proyectos' ? 'bg-[radial-gradient(circle_at_15%_20%,rgba(148,163,184,0.17),transparent_50%)]' : 'bg-[radial-gradient(circle_at_80%_30%,rgba(244,63,94,0.16),transparent_50%)]'} ${showAnim ? 'opacity-100' : 'opacity-0'}`}
+        />
 
         <div className="relative z-10 mb-6 flex flex-shrink-0 items-center justify-between border-b border-zinc-800/80 pb-5">
-          <h3 className="text-2xl sm:text-3xl font-semibold text-zinc-100 tracking-wide">{title}</h3>
-          <button type="button" onClick={onClose} className="rounded-xl border border-zinc-700/80 px-4 py-2 text-xs sm:text-sm uppercase tracking-widest text-zinc-300 transition-all hover:border-zinc-500 hover:text-zinc-100 hover:bg-zinc-800/60 shadow-sm">Cerrar</button>
+          <h3 className="text-2xl sm:text-3xl font-semibold text-zinc-100 tracking-wide">
+            {title}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-zinc-700/80 px-4 py-2 text-xs sm:text-sm uppercase tracking-widest text-zinc-300 transition-all hover:border-zinc-500 hover:text-zinc-100 hover:bg-zinc-800/60 shadow-sm"
+          >
+            Cerrar
+          </button>
         </div>
 
         <ModalGrid title={title} items={items} onSelect={setSelectedItem} />
@@ -148,7 +170,7 @@ export default function ModalOverlay({ isOpen, title, items, onClose, initialIte
           showNavigation={showNavigation}
           onPrev={handlePrev}
           onNext={handleNext}
-          onBack={() => initialItem ? onClose() : setSelectedItem(null)}
+          onBack={() => (initialItem ? onClose() : setSelectedItem(null))}
           detailRef={lightboxRef}
           category={title}
         />
