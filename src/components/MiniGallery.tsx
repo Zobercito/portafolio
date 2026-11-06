@@ -45,7 +45,7 @@ export default function MiniGallery({
   };
 
   return (
-    <article className="group shrink-0 relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/35 p-3 sm:p-4 xl:p-6 backdrop-blur-sm xl:col-span-6 xl:row-span-1 flex flex-col h-full">
+    <article className="group shrink-0 relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/60 p-3 sm:p-4 xl:p-6 xl:col-span-6 xl:row-span-1 flex flex-col h-full">
       <div className={`pointer-events-none absolute inset-0 ${gradientClass}`} />
 
       <div className="relative z-10 flex items-center justify-between shrink-0">
